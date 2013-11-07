@@ -12,7 +12,7 @@ physics.addBody (floor, "static", {friction = 0.5 }) -- static means the object 
 local crates = {}
 for i = 1, 5 do
 	for j = 1, 5 do
-		crates[i] = display.newImage ("crate.png", 140 + (i*50), 220 - (j*50) )
-		physics.addBody( crates[i], {density=0.2, friction=0.1, bounce=0.5} )
+		crates[i] = display.newImage ("gas10.png", 140 + (i*50), 220 - (j*50) )
+		physics.addBody( crates[i], {density=0.1, friction=0.1, bounce=0.5} )
 	end
 end
