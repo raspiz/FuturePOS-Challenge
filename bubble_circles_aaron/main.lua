@@ -15,6 +15,10 @@ physics.addBody( leftSide, "static", {friction = 0, bounce = 0})
 physics.addBody( rightSide, "static",{fricion = 0, bounce =0})
 
 
+--totalWidth = display.contentWidth -- width of screen
+--bubSize = totalWidth / 20
+
+
 for i=1,100 do
 -- local rbub = display.newImage( "rbub.png", 150, 10 )
 -- local ybub = display.newImage( "ybub.png", 150, 10 )
@@ -42,14 +46,14 @@ local function dropbub()
 	local setX = math.random(0, 300) -- lower, upper parameters
 	--local setY = math.random(-25, 25) -- lower, upper parameters
 	
-	local myCircle = display.newCircle( setX, 10, 10 ) --xloc, yloc, radius(size)
+	local myCircle = display.newCircle( setX, 10, 15 ) --xloc, yloc, radius(size)
 	myCircle:setFillColor( 0.5 )
 
-	physics.addBody( myCircle, { density=1, friction=0, bounce=0 } )
+	physics.addBody( myCircle, { density=1, friction=0, bounce=.5 } ) -- with .5 they seem to bouce and settle in better
 
-	myCircle.gravityScale = .5
+	myCircle.gravityScale = .25 -- they settle properly at .25 gravity
 
 
 end
 
-local tr = timer.performWithDelay (1000, dropbub, 100)	-- delay, function to call, iterations
+local tr = timer.performWithDelay (500, dropbub, 100)	-- delay, function to call, iterations
