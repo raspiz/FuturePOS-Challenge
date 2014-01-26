@@ -76,6 +76,8 @@ group.touch = moveBlock
 group:addEventListener( "touch", group )
 
 
+	
+
 --block = display.newImage ("gas10.png", 100, 100)
 
 

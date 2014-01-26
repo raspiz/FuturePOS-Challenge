@@ -40,6 +40,17 @@ for i=1,100 do
 end
 
 
+local paint = {
+    type = "image",
+    filename = "images/bksq.png",
+    baseDir = system.ResourceDirectory
+}
+
+local rect = display.newRect( 0, 0, 150, 150 )
+
+rect.fill = paint
+
+
 
 local function dropbub()
 
@@ -47,8 +58,14 @@ local function dropbub()
 	--local setY = math.random(-25, 25) -- lower, upper parameters
 	
 	local myCircle = display.newCircle( setX, 10, 15 ) --xloc, yloc, radius(size)
-	myCircle:setFillColor( 0.5 )
 
+	
+
+
+	
+	--myCircle:setFillColor( 0.5 )
+	myCircle.fill = { type="image", filename="bbub.png" }
+	
 	physics.addBody( myCircle, { density=1, friction=0, bounce=.5 } ) -- with .5 they seem to bouce and settle in better
 
 	myCircle.gravityScale = .25 -- they settle properly at .25 gravity
