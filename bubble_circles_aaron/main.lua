@@ -73,24 +73,26 @@ local function DropBubble() -- initially fill the screen with bubbles based on t
 	local setX = math.random(0, 300) -- lower, upper parameters
 	--local setY = math.random(-25, 25) -- lower, upper parameters
 	
-	local bubble = display.newCircle( setX, 10, 15 ) --xloc, yloc, radius(size)
-
+	--local bubble = display.newCircle( setX, 10, 15 ) --xloc, yloc, radius(size)
+	local bubble = display.newImage( "bbub2.png", setX, 10 )
+	
+	
 	local bubColor = math.random(0, 3)-- will assign one of four colors to each bubble
 
 
 	
 	
 	if (bubColor == 0) then
-		bubble:setFillColor(0, 0, 255)
+		--bubble:setFillColor(0, 0, 255)
 		bubble.color = "blue"
 	elseif (bubColor == 1) then
-		bubble:setFillColor(0, 255, 0)
+		--bubble:setFillColor(0, 255, 0)
 		bubble.color = "green"
 	elseif (bubColor == 2) then
-		bubble:setFillColor(255, 0, 0)
+		--bubble:setFillColor(255, 0, 0)
 		bubble.color = "red"
 	else-- (bubColor == 3) then
-		bubble:setFillColor(237, 181, 28)	
+		--bubble:setFillColor(237, 181, 28)	
 		bubble.color = "orange"
 	end
 	
