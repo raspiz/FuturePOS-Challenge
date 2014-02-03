@@ -14,61 +14,137 @@ physics.addBody( bottom, "static", {friction = 0, bounce = 0})
 physics.addBody( leftSide, "static", {friction = 0, bounce = 0})
 physics.addBody( rightSide, "static",{fricion = 0, bounce =0})
 
+-- array for bubble objects and array counter. this will be incremented as new bubbles are added
+local marble = {}
+local marbCount = 0
 
+--local function MakeMarble(setX)
+		--marble[marbCount] = display.newCircle( setX, 10, 19 ) --xloc, yloc, radius(size)
+		--marble[marbCount].name = "marble"..marbCount
+		--marble[marbCount].color = "Undefined"
+--end
 
---totalWidth = display.contentWidth -- width of screen
---bubSize = totalWidth / 20
+-- the marble being checked is passed in as a parameter
+local function TouchCheck(self, count, index)
 
+		--touchX = event.x
+		--touchY = event.y
 
-for i=1,100 do
--- local rbub = display.newImage( "rbub.png", 150, 10 )
--- local ybub = display.newImage( "ybub.png", 150, 10 )
--- local gbub = display.newImage( "gbub.png", 150, 10 )
--- local bbub = display.newImage( "bbub.png", 150, 10 )
+	-- need the -1 here since DropMarble increments at the end. this could be rewritten to keep numbers the same
+	for i = 1, marbCount do
+		if (marble[i].color == self.color) then
+			if (marble[i] ~= self and index[i] == nil) then					
+				-- quick check to see if the bubble is close				
+				if (marble[i].x + 50 >= self.x and marble[i].x - 50 <= self.x) and (marble[i].y + 50 >= self.y and marble[i].y - 50 <= self.y) then
+					-- time to do distance calculation to see if they are close enough
+				
+					local distX = self.x - marble[i].x
+					local distY = self.y - marble[i].y
+					
+					local distance = math.sqrt(distX * distX + distY * distY)
+					
+					-- might not need size calculation
+					local size = (self.contentWidth/2) + (marble[i].contentWidth/2)
+					
+					--print("distance is "..distance)
+					--print ("size is "..size)
+					
+					-- might need to adjust this to increase "touching" area to account for gaps
+					if (distance <= 40) then--< size) then
+						
+						count = count + 1
+						index[i] = i
+						index[i] = {checked = "false"}
+						--index[i].checked = "false"
+						
+						--display.remove(marble[i])
+						--self:removeSelf()
+					end
+				
 
--- local myCircle = display.newCircle( 100, 100, 10 )
--- myCircle:setFillColor( 0.5 )
+				
+					--local myTextObject = display.newText( touchX.." "..touchY.." "..marble[i].name, touchX, touchY, "Arial", 20 )
+					
+				end
+			end
+		
+		
+		
+		
+		end
 
--- physics.addBody( myCircle, { density=1, friction=1, bounce=0 } )
+	end
 
--- myCircle.gravityScale = .5
-
--- physics.addBody( rbub, { density=1, friction=0, bounce=0 } )
--- physics.addBody( ybub, { density=1, friction=0, bounce=0 })
--- physics.addBody( gbub, { density=1, friction=0, bounce=0 })
--- physics.addBody( bbub, { density=1, friction=0, bounce=0 })
-
+	return count
+		
 end
 
-local bubble = {}
-local bubCount = 1
 
-local function PopBubble(self, event) -- user touches screen to try to pop a bubble
+local function MatchMarbles(self, event) -- user touches screen to try to pop a bubble
 	
 	if (event.phase == "began") then
 	
+		local touchCount = 1
+		local touchers = {checked = "false"}
+		touchers[self.name] = self.name
+		--print(touchers[self.name])
+		touchers[self.name] = {checked = "true"}
 		
-		touchX = event.x
-		touchY = event.y
-		
-	
-		--local myTextObject = display.newText( touchX.." "..touchY.." "..self.name, touchX, touchY, "Arial", 20 )
+		-- touchCount might need adjusted if it is only passing by value. possibly call the function as an assignment
+		touchCount = TouchCheck(self, touchCount, touchers)
 		
 		
-		for i=1, bubCount do
-			
-			--local myTextObject = display.newText( touchX.." "..touchY.." "..bubble[bubCount].name, touchX, touchY, "Arial", 20 )
-			
-			 if (bubble[bubCount].color == self.color) then--self.color) then
-				-- if (bubble[bubCount].name ~= self.name) then
-					
+		--print(touchCount.." are touching")
+		
+		if (touchCount > 1) then
+			for i = 1, marbCount do			
+				if (touchers[i] ~= nil) then
+					if (touchers[i].checked == "false") then
+						touchCount = TouchCheck(marble[i], touchCount, touchers)	
+						touchers[i].checked = "true"
+						i = 1
+					end				
 				
-				-- end
+					--print("marble "..i.." is touching")
+				end
 			
+			end				
+		end
+		
+		-- marbles will be deleted and the table rebuilt to remove gaps
+		if (touchCount >= 3) then
+			local newTable = marbCount - touchCount -- size of new table
+			local newCount = 1
 			
+			for i = 1, marbCount do	
+				if (touchers[i] ~= nil) then -- this one is to be deleted
+					display.remove(marble[i])
+					marble[i] = nil
+					-- if marble[i] == nil then
+					--print("the value of marble"..i.." is "..marble[i])
+					-- end
+					--marbCount = marbCount - 1
+			--self:removeSelf()		
+				else--if (i <= newTable) then
+					marble[newCount] = marble[i]
+					newCount = newCount + 1
+				--else 
+				--	marble[i] = nil
+				end
 			
+			-- decroemnt marbCount and redo array
+			end
 			
-			 end
+			marbCount = newTable
+			print(marbCount)
+			
+		end
+		
+
+		
+		-- might want to put this in a separate function and pass self in as a parameter
+		
+
 			
 			-- skip self
 			-- skip other colors
@@ -85,7 +161,7 @@ local function PopBubble(self, event) -- user touches screen to try to pop a bub
 		
 		
 		
-		end
+	
 		
 		
 		-- check to see if contacting other bubbles of the same color
@@ -99,119 +175,57 @@ local function PopBubble(self, event) -- user touches screen to try to pop a bub
 end
 
 
--- local function onShake (event)
-	-- if event.isShake then
-	--Device was shaken, so do something.
-	-- bubble.gravityScale = -0.5
-	-- end
--- end
-
--- local function theyHit(self, event)
-	-- if event.phase == "began" then
-		-- textX = math.random(0, display.contentWidth) -- lower, upper parameters
-		-- textY = math.random(0, display.contentHeight)
-		
-		-- physics.setGravity( -5, -5 )
-		
-		-- event.target.setGravity(5, 5)
-		
-		-- refer to the object that has been touched		
-		-- event.target.gravityScale = 1
-		
-		-- return location of touch event
-		-- touchX = event.x
-		-- touchY = event.y
-		
-	
-		-- local myTextObject = display.newText( touchX.." "..touchY, textX, textY, "Arial", 20 )
-	
-	-- end
 
 
 
--- end
+local function DropMarble() -- initially fill the screen with bubbles based on the timer tr	
 
-
-
--- array for bubble objects and array counter. this will be incremented as new bubbles are added
-
-
-
-local function DropBubble() -- initially fill the screen with bubbles based on the timer tr
- 
-	
-
+	marbCount = marbCount + 1
 	
 	local setX = math.random(0, 300) -- lower, upper parameters
 	--local setY = math.random(-25, 25) -- lower, upper parameters
 	
-	bubble[bubCount] = display.newCircle( setX, 10, 19 ) --xloc, yloc, radius(size)
-	--bubble[bubCount] = display.newImage( "bbub3.png", setX, 10 )
+	--MakeMarble(setX)
+	marble[marbCount] = display.newCircle( setX, 10, 19 ) --xloc, yloc, radius(size)
 	
-	bubble[bubCount].name = "bubble"..bubCount
-
+	marble[marbCount].name = marbCount
 	
 	local bubColor = math.random(0, 3)-- will assign one of four colors to each bubble
 
-	--bubble[bubCount]:setFillColor(0, 0, 255)
-	bubble[bubCount].fill = { type="image", filename="bbub3.png" }
-	
-	--bubble[bubCount].strokeWidth = 2
-	--bubble[bubCount].stroke = { 0.6, 0.08, 0.16 }
-	
-	-- local testArray = {}
-	-- testArray[1] = 5
-	-- testArray[2] = "Steve"
-	-- testArray["Bill"] = 0.5
-	
+	--marble[marbCount].fill = { type="image", filename="bbub3.png" }
 	
 	if (bubColor == 0) then
-		--bubble:setFillColor(0, 0, 255)
-		bubble[bubCount].color = "blue"
+		marble[marbCount].color = "blue"
+		marble[marbCount].fill = { type="image", filename="bbub.png" }
 	elseif (bubColor == 1) then
-		--bubble:setFillColor(0, 255, 0)
-		bubble[bubCount].color = "green"
+		marble[marbCount].color = "green"
+		marble[marbCount].fill = { type="image", filename="gbub.png" }
 	elseif (bubColor == 2) then
-		--bubble:setFillColor(255, 0, 0)
-		bubble[bubCount].color = "red"
+		marble[marbCount].color = "red"
+		marble[marbCount].fill = { type="image", filename="rbub.png" }
 	else-- (bubColor == 3) then
-		--bubble:setFillColor(237, 181, 28)	
-		bubble[bubCount].color = "orange"
+		marble[marbCount].color = "orange"
+		marble[marbCount].fill = { type="image", filename="ybub.png" }
 	end
-	
-	
-	
-	
-	physics.addBody( bubble[bubCount], { density=1, friction=0, bounce=.5 } ) -- with .5 they seem to bouce and settle in better
+		
+	physics.addBody( marble[marbCount], { density=1, friction=0, bounce=.5 } ) -- with .5 they seem to bouce and settle in better
+	marble[marbCount].gravityScale = .5 -- they settle properly at .25 gravity
 
-	bubble[bubCount].gravityScale = .5 -- they settle properly at .25 gravity
+	marble[marbCount].touch = MatchMarbles
+	marble[marbCount]:addEventListener("touch", marble[marbCount])
 
-	bubble[bubCount].touch = PopBubble
-	bubble[bubCount]:addEventListener("touch", bubble[bubCount])
+	--print (marble[marbCount].name)
+	-- if ("blue" == "blue") then
+		-- print("true")
+	-- else
+		-- print("false")
+	-- end
 	
-	--bubble[bubCount]:addEventListener("touch", PopBubble)
 	
-	--bubble[bubCount].collision = theyHit
-	--bubble[bubCount]:addEventListener("collision", bubble[bubCount])
-	
-
-	--bubble:addEventListener("accelerometer", onShake)
-	
-	bubCount = bubCount + 1
-	print (bubCount)
-	
+	print(marbCount)
 end
 
-
---function bubble:Collision(event)
-
-
-
---end
-
-
-
-local tr = timer.performWithDelay (500, DropBubble, 100)	-- delay, function to call, iterations
+local tr = timer.performWithDelay (10, DropMarble, 100)	-- delay, function to call, iterations -- was 500, DropMarble, 100
 
 
 
