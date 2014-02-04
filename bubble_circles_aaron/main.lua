@@ -196,16 +196,16 @@ local function DropMarble() -- initially fill the screen with bubbles based on t
 	
 	if (bubColor == 0) then
 		marble[marbCount].color = "blue"
-		marble[marbCount].fill = { type="image", filename="bbub.png" }
+		marble[marbCount].fill = { type="image", filename="bBub.png" }
 	elseif (bubColor == 1) then
 		marble[marbCount].color = "green"
-		marble[marbCount].fill = { type="image", filename="gbub.png" }
+		marble[marbCount].fill = { type="image", filename="gBub.png" }
 	elseif (bubColor == 2) then
 		marble[marbCount].color = "red"
-		marble[marbCount].fill = { type="image", filename="rbub.png" }
+		marble[marbCount].fill = { type="image", filename="rBub.png" }
 	else-- (bubColor == 3) then
 		marble[marbCount].color = "orange"
-		marble[marbCount].fill = { type="image", filename="ybub.png" }
+		marble[marbCount].fill = { type="image", filename="oBub.png" }
 	end
 		
 	physics.addBody( marble[marbCount], { density=1, friction=0, bounce=.5 } ) -- with .5 they seem to bouce and settle in better
