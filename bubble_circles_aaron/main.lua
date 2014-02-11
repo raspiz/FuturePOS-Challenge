@@ -22,52 +22,30 @@ local function TouchCheck (marbNum, count)
 
 	for i = 1, marbCount do	
 		if (marble[i].color == marble[marbNum].color and marble[i].checked == false and marble[i].match == false) then -- checked good
-			if (i ~= marbNum) then -- not self
-				
+			if (i ~= marbNum) then -- not self				
 				local distX = marble[marbNum].x - marble[i].x
-				local distY = marble[marbNum].y - marble[i].y
-				
+				local distY = marble[marbNum].y - marble[i].y				
 				local distance = math.sqrt(distX * distX + distY * distY)
 				
-				--local size = (marble[marbNum].contentWidth/2) + (marble[i].contentWidth/2)
-				
-				--print("size"..size)
-				--print("distance"..distance)
-				
-				if (distance <= 45) then--<= size) then
-				
+				if (distance <= 45) then--<= size) then				
 					marble[i].match = true
-					count = count + 1
-				
-				end
-				
-				--print(marble[i].color)
-		
+					count = count + 1				
+				end	
 			end
-		end
-		
+		end		
 	end
-
-
-
-
-	return count
 	
+	return count	
 end
 
 
-local function MatchMarbles(event) -- user touches screen to try to pop a bubble
-	
-	if (event.phase == "began") then
-		
+local function MatchMarbles(event) -- user touches screen to try to pop a bubble	
+	if (event.phase == "began") then		
 		local touchCount = 1
-		local deleted = 1
-		
+		local deleted = 1		
 		local num = event.target.name
 		
 		print("my name is "..event.target.name)
-		--marble[num].checked = true
-		--marble[num].match = true
 		event.target.match = true
 		event.target.checked = true
 		
@@ -82,23 +60,15 @@ local function MatchMarbles(event) -- user touches screen to try to pop a bubble
 				end			
 			end		
 		end
-	
-	
-	
-	
-
+		
 		-- deletion
 		if (touchCount >= 3) then
 			for i = 1, marbCount do
 				print(marble[i].match)
 				if (marble[i].match and touchCount > 1) then
-					if (i == num) then
-						
-						--print("hello")
-						
+					if (i == num) then						
 						event.target:removeSelf()
-						marble[num] = nil		
-					
+						marble[num] = nil						
 					else
 						display.remove(marble[i])				
 						marble[i] = nil
@@ -106,15 +76,9 @@ local function MatchMarbles(event) -- user touches screen to try to pop a bubble
 					end
 				end		
 			end
-			
-			
-			
-		
-			local tempTable = {}
-			--tempTable = marble		
-			
-			local newCount = 0
-			
+					
+			local tempTable = {}		
+			local newCount = 0			
 			
 			for i = 1, marbCount do
 				if(marble[i] ~= nil) then
@@ -130,40 +94,18 @@ local function MatchMarbles(event) -- user touches screen to try to pop a bubble
 			marble = tempTable
 			
 			marbCount = marbCount - deleted
-			print(deleted.." marbles deleted")			
-			
-
-		
-
+			print(deleted.." marbles deleted")
 		end
 		
 		print(marbCount.." marbles left")	
-
 		
-		for i = 1, marbCount do
-			--print(marble[i].color)
-			--print(marble[i].name)
-			
+		for i = 1, marbCount do		
 			marble[i].checked = false
 			marble[i].match = false
 			marble[i].name = i
 			print(marble[i].name)
 		end
-		
-		--print(marble[self.name].." "..marble[self.color])
-		--print(marble[self.color])
-		--print(self.checked)
-		
-		
-		-- might want to loop this to be safe
-			-- if (marble[num] ~= nil) then
-				-- event.target.checked = false
-				-- event.target.match = false
-			-- end
-	
 	end
-	
-	
 end
 	
 
@@ -203,20 +145,10 @@ local function DropMarble() -- initially fill the screen with bubbles based on t
 	physics.addBody( marble[marbCount], { density=1, friction=0, bounce=.5 } ) -- with .5 they seem to bouce and settle in better
 	marble[marbCount].gravityScale = .5 -- they settle properly at .25 gravity
 
-	--marble[marbCount].touch = MatchMarbles
-	marble[marbCount]:addEventListener("touch", MatchMarbles)--, marble[marbCount])
-
-	--print (marble[marbCount].name)
-	-- if ("blue" == "blue") then
-		-- print("true")
-	-- else
-		-- print("false")
-	-- end
-	
+	marble[marbCount]:addEventListener("touch", MatchMarbles)--, marble[marbCount])	
 	
 	print(marbCount)
-	--print(marble[1].color)
-	--print(marble[marbCount].name)
+
 end
 
 local tr = timer.performWithDelay (250, DropMarble, 100)	-- delay, function to call, iterations -- was 500, DropMarble, 100
