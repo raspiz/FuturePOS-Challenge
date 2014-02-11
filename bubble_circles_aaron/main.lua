@@ -18,7 +18,154 @@ physics.addBody( rightSide, "static",{fricion = 0, bounce =0})
 local marble = {}
 local marbCount = 0
 
+local function TouchCheck (marbNum, count)
 
+	for i = 1, marbCount do	
+		if (marble[i].color == marble[marbNum].color and marble[i].checked == false and marble[i].match == false) then -- checked good
+			if (i ~= marbNum) then -- not self
+				
+				local distX = marble[marbNum].x - marble[i].x
+				local distY = marble[marbNum].y - marble[i].y
+				
+				local distance = math.sqrt(distX * distX + distY * distY)
+				
+				--local size = (marble[marbNum].contentWidth/2) + (marble[i].contentWidth/2)
+				
+				--print("size"..size)
+				--print("distance"..distance)
+				
+				if (distance <= 45) then--<= size) then
+				
+					marble[i].match = true
+					count = count + 1
+				
+				end
+				
+				--print(marble[i].color)
+		
+			end
+		end
+		
+	end
+
+
+
+
+	return count
+	
+end
+
+
+local function MatchMarbles(event) -- user touches screen to try to pop a bubble
+	
+	if (event.phase == "began") then
+		
+		local touchCount = 1
+		local deleted = 1
+		
+		local num = event.target.name
+		
+		print("my name is "..event.target.name)
+		--marble[num].checked = true
+		--marble[num].match = true
+		event.target.match = true
+		event.target.checked = true
+		
+		touchCount = TouchCheck(num, touchCount)
+
+		if (touchCount > 1) then
+			for i = 1, marbCount do
+				if (marble[i].match == true and marble[i].checked == false) then
+					touchCount = TouchCheck(i, touchCount)
+					marble[i].checked = true
+					i = 0			
+				end			
+			end		
+		end
+	
+	
+	
+	
+
+		-- deletion
+		if (touchCount >= 3) then
+			for i = 1, marbCount do
+				print(marble[i].match)
+				if (marble[i].match and touchCount > 1) then
+					if (i == num) then
+						
+						--print("hello")
+						
+						event.target:removeSelf()
+						marble[num] = nil		
+					
+					else
+						display.remove(marble[i])				
+						marble[i] = nil
+						deleted = deleted + 1	
+					end
+				end		
+			end
+			
+			
+			
+		
+			local tempTable = {}
+			--tempTable = marble		
+			
+			local newCount = 0
+			
+			
+			for i = 1, marbCount do
+				if(marble[i] ~= nil) then
+					newCount = newCount + 1					
+					tempTable[newCount] = marble[i]
+				end
+			end
+			
+			for i = 1, marbCount do			
+				marble[i] = nil			
+			end
+			
+			marble = tempTable
+			
+			marbCount = marbCount - deleted
+			print(deleted.." marbles deleted")			
+			
+
+		
+
+		end
+		
+		print(marbCount.." marbles left")	
+
+		
+		for i = 1, marbCount do
+			--print(marble[i].color)
+			--print(marble[i].name)
+			
+			marble[i].checked = false
+			marble[i].match = false
+			marble[i].name = i
+			print(marble[i].name)
+		end
+		
+		--print(marble[self.name].." "..marble[self.color])
+		--print(marble[self.color])
+		--print(self.checked)
+		
+		
+		-- might want to loop this to be safe
+			-- if (marble[num] ~= nil) then
+				-- event.target.checked = false
+				-- event.target.match = false
+			-- end
+	
+	end
+	
+	
+end
+	
 
 
 
@@ -27,13 +174,13 @@ local function DropMarble() -- initially fill the screen with bubbles based on t
 
 	marbCount = marbCount + 1
 	
-	local setX = math.random(0, 300) -- lower, upper parameters
-	--local setY = math.random(-25, 25) -- lower, upper parameters
-	
-	--MakeMarble(setX)
-	marble[marbCount] = display.newCircle( setX, 10, 19 ) --xloc, yloc, radius(size)
+	local setX = math.random(0, 300) -- lower, upper parameters	
+
+	marble[marbCount] = display.newCircle( setX, 0, 19 ) --xloc, yloc, radius(size)
 	
 	marble[marbCount].name = marbCount
+	marble[marbCount].checked = false
+	marble[marbCount].match = false
 	
 	local bubColor = math.random(0, 3)-- will assign one of four colors to each bubble
 
@@ -56,8 +203,8 @@ local function DropMarble() -- initially fill the screen with bubbles based on t
 	physics.addBody( marble[marbCount], { density=1, friction=0, bounce=.5 } ) -- with .5 they seem to bouce and settle in better
 	marble[marbCount].gravityScale = .5 -- they settle properly at .25 gravity
 
-	marble[marbCount].touch = MatchMarbles
-	marble[marbCount]:addEventListener("touch", marble[marbCount])
+	--marble[marbCount].touch = MatchMarbles
+	marble[marbCount]:addEventListener("touch", MatchMarbles)--, marble[marbCount])
 
 	--print (marble[marbCount].name)
 	-- if ("blue" == "blue") then
@@ -68,6 +215,8 @@ local function DropMarble() -- initially fill the screen with bubbles based on t
 	
 	
 	print(marbCount)
+	--print(marble[1].color)
+	--print(marble[marbCount].name)
 end
 
-local tr = timer.performWithDelay (10, DropMarble, 100)	-- delay, function to call, iterations -- was 500, DropMarble, 100
+local tr = timer.performWithDelay (250, DropMarble, 100)	-- delay, function to call, iterations -- was 500, DropMarble, 100

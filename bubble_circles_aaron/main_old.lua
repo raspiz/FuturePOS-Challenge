@@ -139,9 +139,7 @@ local function MatchMarbles(self, event) -- user touches screen to try to pop a 
 			print(marbCount)
 			
 		end
-		
-
-		
+				
 		-- might want to put this in a separate function and pass self in as a parameter
 		
 
@@ -158,11 +156,6 @@ local function MatchMarbles(self, event) -- user touches screen to try to pop a 
 			
 		-- if there is a deletion, delete bubbles that are touching, reassign remaining bubbles to a new
 		-- array and make the values of the original array nil so that once loop is complete, original array is gone
-		
-		
-		
-	
-		
 		
 		-- check to see if contacting other bubbles of the same color
 			-- if touching bubble of same color, have that bubble also do a check
@@ -226,10 +219,3 @@ local function DropMarble() -- initially fill the screen with bubbles based on t
 end
 
 local tr = timer.performWithDelay (10, DropMarble, 100)	-- delay, function to call, iterations -- was 500, DropMarble, 100
-
-
-
-
-
-
-
