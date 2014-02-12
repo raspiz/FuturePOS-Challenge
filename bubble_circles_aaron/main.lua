@@ -1,6 +1,8 @@
 local physics = require ( "physics" )
 physics.start()
 
+physics.setScale( 30 ) -- scale of the objects may need to change or remove this
+
 local bottom = display.newImage("stones.png")
 local leftSide = display.newImage("wall1.png")
 local rightSide = display.newImage("wall2.png")
@@ -12,11 +14,108 @@ leftSide.x = 0; leftSide.y = 5;
 bottom.x = 100; bottom.y = 500;
 physics.addBody( bottom, "static", {friction = 0, bounce = 0})
 physics.addBody( leftSide, "static", {friction = 0, bounce = 0})
-physics.addBody( rightSide, "static",{fricion = 0, bounce =0})
+physics.addBody( rightSide, "static",{friction = 0, bounce =0})
 
 -- array for bubble objects and array counter. this will be incremented as new bubbles are added
 local marble = {}
 local marbCount = 0
+
+
+
+
+
+
+--circle.myName = "circle"
+
+
+
+
+local function onLocalCollision( self, event )
+    if ( event.phase == "began" and self.name == "circle" ) then
+        local forcex = event.other.x-self.x
+        local forcey = event.other.y-self.y
+        if(forcex < 0) then
+            forcex = 0-(80 + forcex)-12
+        else
+            forcex = 80 - forcex+12
+        end
+        event.other:applyForce( forcex, forcey, self.x, self.y )
+		
+		if(math.abs(forcex) > 60 or math.abs(forcey) > 60) then
+			--local explosion = display.newImage( "explosion.png", event.other.x, event.other.y )
+			event.other:removeSelf()
+			print(event.other.name)
+			--need to change this to make sure to remove them from the marble array
+			local function removeExplosion( event )
+				--explosion:removeSelf()
+			end
+
+			timer.performWithDelay( 50,  removeExplosion)
+		end
+		
+		
+		
+    end
+end
+
+
+ 
+local function setBomb ( event )
+    if(event.phase == "began") then
+	--print("hello")
+	
+		local circle = ""--nil	
+		local name = "circle"
+		
+		local blastX = event.target.x
+		local blastY = event.target.y
+	
+		local function blast(event)
+			--sound event
+			-- can put explosion picture in too
+			circle = display.newCircle( blastX, blastY, 80 )			
+			circle.name = name
+			circle:setFillColor(255,0,0, .5) -- make this invisible (0,0,0,0)
+			physics.addBody( circle, "static", {isSensor = true} )
+			circle.collision = onLocalCollision
+			circle:addEventListener( "collision", circle )			
+		end
+	
+		local function removeStuff(event)
+			circle:removeSelf()
+		end
+
+        timer.performWithDelay(50, blast )
+        timer.performWithDelay(110, removeStuff)
+
+    end
+        --if(event.phase == "ended") then
+        --circle:removeSelf()
+    --end
+end
+ 
+--background:addEventListener("touch",setBomb)
+
+
+
+
+
+
+-- local function BlowUp(event)
+	-- if (event.phase == "began") then
+		-- local blastRadius = ""
+		-- local explosion = ""
+		-- local function Blast(event)
+			-- blastRadius = display.newCircle (
+
+
+		-- end
+		
+
+		-- event.target:applyForce( 500, 500, event.target.x, event.target.y )
+		
+	-- end
+-- end
 
 local function TouchCheck (marbNum, count)
 
@@ -37,6 +136,8 @@ local function TouchCheck (marbNum, count)
 	
 	return count	
 end
+
+
 
 
 local function MatchMarbles(event) -- user touches screen to try to pop a bubble	
@@ -124,31 +225,43 @@ local function DropMarble() -- initially fill the screen with bubbles based on t
 	marble[marbCount].checked = false
 	marble[marbCount].match = false
 	
-	local bubColor = math.random(0, 3)-- will assign one of four colors to each bubble
-
-	--marble[marbCount].fill = { type="image", filename="bbub3.png" }
+	local wildCard = math.random(0, 99)
 	
-	if (bubColor == 0) then
-		marble[marbCount].color = "blue"
-		marble[marbCount].fill = { type="image", filename="bBub.png" }
-	elseif (bubColor == 1) then
-		marble[marbCount].color = "green"
-		marble[marbCount].fill = { type="image", filename="gBub.png" }
-	elseif (bubColor == 2) then
-		marble[marbCount].color = "red"
-		marble[marbCount].fill = { type="image", filename="rBub.png" }
-	else-- (bubColor == 3) then
-		marble[marbCount].color = "orange"
-		marble[marbCount].fill = { type="image", filename="oBub.png" }
+	if (wildCard < 5) then
+		marble[marbCount].color = "wild"
+		marble[marbCount].fill = { type="image", filename="wbub.png" }	
+
+		--marble[marbCount]:addEventListener("touch",setBomb)		
+	else 
+		local marbColor = math.random(0, 3)-- will assign one of four colors to each bubble
+	
+		if (marbColor == 0) then
+			marble[marbCount].color = "blue"
+			marble[marbCount].fill = { type="image", filename="bBub.png" }
+		elseif (marbColor == 1) then
+			marble[marbCount].color = "green"
+			marble[marbCount].fill = { type="image", filename="gBub.png" }
+		elseif (marbColor == 2) then
+			marble[marbCount].color = "red"
+			marble[marbCount].fill = { type="image", filename="rBub.png" }
+		else-- (marbColor == 3) then
+			marble[marbCount].color = "orange"
+			marble[marbCount].fill = { type="image", filename="oBub.png" }
+		end		
+		
+		marble[marbCount]:addEventListener("touch", MatchMarbles)--, marble[marbCount])			
 	end
+	
+	
+
 		
 	physics.addBody( marble[marbCount], { density=1, friction=0, bounce=.5 } ) -- with .5 they seem to bouce and settle in better
 	marble[marbCount].gravityScale = .5 -- they settle properly at .25 gravity
 
-	marble[marbCount]:addEventListener("touch", MatchMarbles)--, marble[marbCount])	
+
 	
 	print(marbCount)
 
 end
 
-local tr = timer.performWithDelay (250, DropMarble, 100)	-- delay, function to call, iterations -- was 500, DropMarble, 100
+local tr = timer.performWithDelay (10, DropMarble, 100)	-- delay, function to call, iterations -- was 500, DropMarble, 100
