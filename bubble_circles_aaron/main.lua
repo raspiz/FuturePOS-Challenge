@@ -31,10 +31,17 @@ local gameScore = 0
 local level = 1
 local scoreToBeat = 500--1000
 --local timeToBeat = 3000
-local timeToBeat = 4000
+local timeToBeat = 3000
 local timeLeft = timeToBeat
 local dropSpeed = 1000	
 local marbleColors = 3
+
+local blopSound = audio.loadSound("blop.mp3")
+local dropSound = audio.loadSound("drop.mp3")
+local winSound = audio.loadSound("win.mp3")
+local twinkleSound = audio.loadSound("twinkle.mp3")
+
+
 
 local function onLocalCollision( self, event )
     if ( event.phase == "began" and self.name == "circle" ) then
@@ -149,16 +156,17 @@ local function MatchMarbles(event) -- user touches screen to try to pop a bubble
 		
 		-- deletion
 		if (touchCount >= 3) then
+			audio.play(blopSound)
 			for i = 1, marbCount do			
 				--print(marble[i].match)
 				if (marble[i].match) then --and touchCount > 1) then
 					if (i == num) then						
 						event.target:removeSelf()
-						marble[num] = nil						
+						marble[num] = nil
 					else
 						display.remove(marble[i])				
 						marble[i] = nil
-						deleted = deleted + 1	
+						deleted = deleted + 1
 					end
 				end		
 			end
@@ -187,9 +195,18 @@ local function MatchMarbles(event) -- user touches screen to try to pop a bubble
 			elseif (deleted < 6) then	
 				newScore = deleted * 1.5 * 10
 				textOutput = "X1.5 Multiplier!"
-			else
+			elseif (deleted < 8) then
 				newScore = deleted * 2 * 10
 				textOutput = "X2 Multiplier!"
+				audio.play(twinkleSound)
+			elseif (deleted < 10) then
+				newScore = deleted * 2.5 * 10
+				textOutput = "X2.5 Multiplier!"
+				audio.play(twinkleSound)
+			else
+				newScore = deleted * 3 * 10
+				textOutput = "X3 Multiplier!"
+				audio.play(twinkleSound)
 			end
 			
 			--function ShowText()			
@@ -202,7 +219,7 @@ local function MatchMarbles(event) -- user touches screen to try to pop a bubble
 			
 			
 			--timer.performWithDelay(50, ShowText)
-			timer.performWithDelay(3000, RemoveText)
+			timer.performWithDelay(2000, RemoveText)
 			
 			gameScore = gameScore + newScore
 			
@@ -240,17 +257,17 @@ local function DropMarble() -- initially fill the screen with bubbles based on t
 		
 		
 		if (xUp) then
-			if (setX >= 280) then
+			if (setX >= 240) then
 				xUp = false
 			end	
 			
-			setX = setX + 20
+			setX = setX + 40
 		else
-			if (setX <= 40) then
+			if (setX <= 80) then
 				xUp = true
 			end
 			
-			setX = setX - 20		
+			setX = setX - 40		
 		end
 		
 		
@@ -272,15 +289,19 @@ local function DropMarble() -- initially fill the screen with bubbles based on t
 			if (marbColor == 0) then
 				marble[marbCount].color = "blue"
 				marble[marbCount].fill = { type="image", filename="bBub.png" }
+				--marble[marbCount]:setFillColor(0, 0, 255)
 			elseif (marbColor == 1) then
 				marble[marbCount].color = "green"
 				marble[marbCount].fill = { type="image", filename="gBub.png" }
+				--marble[marbCount]:setFillColor(0, 255, 0)
 			elseif (marbColor == 2) then
 				marble[marbCount].color = "red"
 				marble[marbCount].fill = { type="image", filename="rBub.png" }
+				--marble[marbCount]:setFillColor(255, 0, 0)
 			else-- (marbColor == 3) then
 				marble[marbCount].color = "orange"
 				marble[marbCount].fill = { type="image", filename="oBub.png" }
+				--marble[marbCount]:setFillColor(239, 247, 24)
 			end		
 			
 			marble[marbCount]:addEventListener("touch", MatchMarbles)--, marble[marbCount])			
@@ -289,9 +310,20 @@ local function DropMarble() -- initially fill the screen with bubbles based on t
 		
 
 			
-		physics.addBody( marble[marbCount], { density=1, friction=0, bounce=.5 } ) -- with .5 they seem to bouce and settle in better
+		physics.addBody( marble[marbCount], { density=2, friction=0, bounce=.5 } ) -- with .5 they seem to bouce and settle in better
 		marble[marbCount].gravityScale = .5 -- they settle properly at .25 gravity
 
+		-- drop sound
+		-- since there are only 32 audio channels and this sound may play rapidly,
+		-- a variable to find a free channel is created, starting on channel 10.
+		-- if no channel above the passed in number is found, it defaults to 0
+		-- this allows other sounds to occupy the lower channels
+		-- an if statement checks the value of availableChannel. if it is not 0,
+		-- then there is a free channel for the audio, otherwise it doesn't play
+		local availableChannel = audio.findFreeChannel(10)
+		if (availableChannel ~= 0) then
+			audio.play( dropSound, { channel=availableChannel } )
+		end
 	end
 	
 	--print(marbCount)
@@ -343,7 +375,7 @@ local function StartGame()
 		gameOn = true		
 	elseif (gameScore >= scoreToBeat) then
 	
-
+		audio.play(winSound)
 
 		timer.cancel(gameTimer)
 		timer.cancel(drop)
@@ -361,19 +393,19 @@ local function StartGame()
 
 
 		dropSpeed = dropSpeed - 50
-		if (dropSpeed == 0) then
+		if (dropSpeed <= 0) then
 			dropSpeed = 1
 		end
 
 		level = level + 1
 
 		--scoreToBeat = scoreToBeat * 2
-		scoreToBeat = scoreToBeat * 1.5
+		scoreToBeat = scoreToBeat * 1.4
 
-		timeToBeat = timeToBeat - 150
-		if (timeToBeat <= 0) then
-			timeToBeat = 1
-		end
+		--timeToBeat = timeToBeat - 150
+		-- if (timeToBeat <= 0) then
+			-- timeToBeat = 1
+		-- end
 		
 		timeLeft = timeToBeat
 		
