@@ -29,8 +29,9 @@ local gameScore = 0
 
 -- game parameters
 local level = 1
-local scoreToBeat = 1000
-local timeToBeat = 3000
+local scoreToBeat = 500--1000
+--local timeToBeat = 3000
+local timeToBeat = 4000
 local timeLeft = timeToBeat
 local dropSpeed = 1000	
 local marbleColors = 3
@@ -304,18 +305,18 @@ local function TickClock()
 	-- check for win
 	
 	
-	timeLeft = timeLeft - 1
+	timeLeft = timeLeft - 10
 	
 	
 	
-	if (gameScore >= scoreToBeat) then
-		print("You win!")
-		--levelBeat = true
-	elseif (timeLeft == 0) then
-		print("You lose")
-	else
+	-- if (gameScore >= scoreToBeat) then
+		-- print("You win!")
+
+	-- elseif (timeLeft == 0) then
+		-- print("You lose")
+	-- else
 		print("Time left: "..timeLeft.." Score: "..gameScore.." Level: "..level)
-	end
+	-- end
 	
 
 	
@@ -336,41 +337,57 @@ local function StartGame()
 	if (level == 1 and gameScore == 0 and gameOn == false) then -- start game		
 
 	
-		gameTimer = timer.performWithDelay (1000, TickClock, 3000) 
+		gameTimer = timer.performWithDelay (1000, TickClock, timeToBeat) 
 		drop = timer.performWithDelay (dropSpeed, DropMarble, -1)--, 100)	-- delay, function to call, iterations -- was 500, DropMarble, 100
 		
-		gameOn = true
-		--DropIn(gameOn)
-		--Timer(gameOn)	
-		
-	elseif (gameScore >= scoreToBeat) then--(levelBeat == true) then
+		gameOn = true		
+	elseif (gameScore >= scoreToBeat) then
+	
 
-		-- print("1")
-		-- timer.cancel(gameTimer)
-		-- timer.cancel(drop)
-		-- print("2")
-		-- dropSpeed = dropSpeed - 500
-				-- print("3")
-		-- level = level + 1
-				-- print("4")
-		-- scoreToBeat = scoreToBeat * 2
-				-- print("5")
-		-- timeToBeat = timeToBeat - 500
-				-- print("6")
-		-- timeLeft = timeToBeat
+
+		timer.cancel(gameTimer)
+		timer.cancel(drop)
+		gameTimer = nil
+		drop = nil	
 		
-				-- print("7")
-		-- if (level > 4) then
-			-- marbleColors = 4
-		-- end 
+		for i = 1, marbCount do	
+			display.remove(marble[i])				
+			marble[i] = nil				
+		end
+
+		marble = {}
+		marbCount = 0
 		
 
-				-- print("8")
-		-- gameTimer = timer.performWithDelay (1000, TickClock, 3000) 
-		-- drop = timer.performWithDelay (dropSpeed, DropMarble, -1)--, 100)	-- delay, function to call, iterations -- was 500, DropMarble, 100
+
+		dropSpeed = dropSpeed - 50
+		if (dropSpeed == 0) then
+			dropSpeed = 1
+		end
+
+		level = level + 1
+
+		--scoreToBeat = scoreToBeat * 2
+		scoreToBeat = scoreToBeat * 1.5
+
+		timeToBeat = timeToBeat - 150
+		if (timeToBeat <= 0) then
+			timeToBeat = 1
+		end
+		
+		timeLeft = timeToBeat
+		
+
+		if (level > 4) then
+			marbleColors = 4
+		end 		
+
+		gameTimer = timer.performWithDelay (1000, TickClock, timeToBeat) 
+		drop = timer.performWithDelay (dropSpeed, DropMarble, -1)--, 100)	-- delay, function to call, iterations -- was 500, DropMarble, 100
+		
+
 		
 		
-		--levelBeat = false
 	end
 		
 end
