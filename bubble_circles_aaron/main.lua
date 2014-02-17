@@ -24,6 +24,7 @@ local xUp = true
 
 local levelBeat = false
 local gameOn = false
+local mute = false
 
 local gameScore = 0
 
@@ -41,7 +42,18 @@ local dropSound = audio.loadSound("drop.mp3")
 local winSound = audio.loadSound("win.mp3")
 local twinkleSound = audio.loadSound("twinkle.mp3")
 
+local backGroundMusic
+--local sdtrk = audio.loadSound("Pamgaea.mp3")
+local sdtrk = audio.loadStream("Pamgaea.mp3")
 
+
+local function bgMusic()
+	if(mute == false)then
+		backGroundMusic = audio.play( sdtrk, {channel= 1, loops = -1 }  )
+	else
+		audio.pause(1)
+	end
+end
 
 local function onLocalCollision( self, event )
     if ( event.phase == "began" and self.name == "circle" ) then
@@ -373,6 +385,7 @@ local function StartGame()
 		drop = timer.performWithDelay (dropSpeed, DropMarble, -1)--, 100)	-- delay, function to call, iterations -- was 500, DropMarble, 100
 		
 		gameOn = true		
+		bgMusic()
 	elseif (gameScore >= scoreToBeat) then
 	
 		audio.play(winSound)
