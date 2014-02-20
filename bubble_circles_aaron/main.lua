@@ -139,6 +139,7 @@ local function MatchMarbles(event)
 		-- were found, addional checks will be performed on the matched marbles
 		touchCount = TouchCheck(num, touchCount)
 
+		-- the rest of the function will only execute if additional matches were found
 		if (touchCount > 1) then		
 			event.target.match = true
 			event.target.checked = true	
@@ -161,99 +162,110 @@ local function MatchMarbles(event)
 					end		
 				end		
 			end
-		end
-		
-		-- deletion
-		if (touchCount >= 3) then
-			audio.play(blopSound)
-			for i = 1, marbCount do	
-				if (marble[i].match) then
-					if (i == num) then						
-						event.target:removeSelf()
-						marble[num] = nil
-					else
-						display.remove(marble[i])				
-						marble[i] = nil
-						deleted = deleted + 1
-					end
-				end		
-			end
-					
-			local tempTable = {}		
-			local newCount = 0			
 			
-			for i = 1, marbCount do
-				if(marble[i] ~= nil) then
-					newCount = newCount + 1					
-					tempTable[newCount] = marble[i]
+			-- deletion will occur if a group of 3 or more marbles was found at the touch event
+			-- the marble will be removed from the screen, and then set as nil in the table
+			if (touchCount >= 3) then
+				audio.play(blopSound)
+				for i = 1, marbCount do	
+					if (marble[i].match) then
+						if (i == num) then	-- special case to remove the marble that was touched				
+							event.target:removeSelf()
+							marble[num] = nil
+						else -- all other matched marbles deleted here
+							display.remove(marble[i])				
+							marble[i] = nil
+							deleted = deleted + 1
+						end
+					end		
 				end
-			end
-			
-			for i = 1, marbCount do			
-				marble[i] = nil			
-			end
-			
-			marble = tempTable
-			
-			local newScore = 0
-			local textOutput = ""
-			
-			if (deleted == 3) then
-				newScore = deleted * 10				
-			elseif (deleted < 6) then	
-				newScore = deleted * 1.5 * 10
-				textOutput = "X1.5 Multiplier!"
-			elseif (deleted < 8) then
-				newScore = deleted * 2 * 10
-				textOutput = "X2 Multiplier!"
-				audio.play(twinkleSound)
-			elseif (deleted < 10) then
-				newScore = deleted * 2.5 * 10
-				textOutput = "X2.5 Multiplier!"
-				audio.play(twinkleSound)
-			else
-				newScore = deleted * 3 * 10
-				textOutput = "X3 Multiplier!"
-				audio.play(twinkleSound)
-			end
-			
-			--function ShowText()			
+						
+				-- temporary table and count are created and the remaining marbles are placed inside		
+				local tempTable = {}		
+				local newCount = 0			
+				
+				for i = 1, marbCount do
+					if(marble[i] ~= nil) then -- only marbles that have not been deleted are added
+						newCount = newCount + 1					
+						tempTable[newCount] = marble[i]
+					end
+				end
+				
+				-- explicitely make the original marble table nil
+				for i = 1, marbCount do			
+					marble[i] = nil			
+				end
+				
+				-- assign the temp table to the original table
+				marble = tempTable
+				
+				-- scoring data is computed and output to the screen
+				local newScore = 0
+				local textOutput = ""
+				
+				if (deleted == 3) then
+					newScore = deleted * 10				
+				elseif (deleted < 6) then	
+					newScore = deleted * 1.5 * 10
+					textOutput = "X1.5 Multiplier!"
+				elseif (deleted < 8) then
+					newScore = deleted * 2 * 10
+					textOutput = "X2 Multiplier!"
+					audio.play(twinkleSound)
+				elseif (deleted < 10) then
+					newScore = deleted * 2.5 * 10
+					textOutput = "X2.5 Multiplier!"
+					audio.play(twinkleSound)
+				else
+					newScore = deleted * 3 * 10
+					textOutput = "X3 Multiplier!"
+					audio.play(twinkleSound)
+				end
+				
 				local scoreText = display.newText(textOutput, event.target.x, event.target.y, "Arial", 20 )
-			--end
+				
+				-- this function will be called by a timer event to remove the text indicator after a set amount of time
+				local function RemoveText(event)
+					scoreText:removeSelf()
+				end
+				
+				timer.performWithDelay(2000, RemoveText)
+				
+				gameScore = gameScore + newScore -- total score updated
+				
+				marbCount = marbCount - deleted -- table size variable adjusted
+			end	
 			
-			local function RemoveText(event)
-				scoreText:removeSelf()
-			end
-			
-			
-			--timer.performWithDelay(50, ShowText)
-			timer.performWithDelay(2000, RemoveText)
-			
-			gameScore = gameScore + newScore
-			
-			marbCount = marbCount - deleted
-		end
-		
-		for i = 1, marbCount do		
-			marble[i].checked = false
-			marble[i].match = false
-			marble[i].name = i
+			-- if ANY matches were found, the table is run through and all marbles are explicitely 
+			-- set to not checked and not a match
+			for i = 1, marbCount do		
+				marble[i].checked = false
+				marble[i].match = false
+				marble[i].name = i
+			end			
 		end
 	end
 end
 	
 --[[
-DropMarble:
+DropMarble: This function will be called by the StartGame function on a timer set by the game parameters.
+Each time it is called, a new marble will be created, added to the table, and dropped into the game space
 
+--A new marble will only be dropped if the screen is not full already.
 
+--New marbles spawn along the x axis. it is incremented and decremented until the edge of the screen to help
+prevent them from bunching up when dropping in rapidly
 
+--Parameters and properties are added to each marble: 
+name(index value), checked, match, touch listener, physics properties. color is randomly assigned.
 --]]
-local function DropMarble() -- initially fill the screen with bubbles based on the timer tr	
-	if (marbCount < 96) then
+local function DropMarble()
+	if (marbCount < 96) then -- max number of marbles on the screen
 
-		marbCount = marbCount + 1
+		marbCount = marbCount + 1 -- starts at 0 when game is launched. the first marble will be index 1
 		marble[marbCount] = display.newCircle( setX, -70, 19 ) --xloc, yloc, radius(size)		
 		
+		-- spawn location of marbles shifts left and right to let them fall clear of one another
 		if (xUp) then
 			if (setX >= 240) then
 				xUp = false
@@ -268,10 +280,16 @@ local function DropMarble() -- initially fill the screen with bubbles based on t
 			setX = setX - 40		
 		end		
 		
+		-- marble properties are assigned
 		marble[marbCount].name = marbCount
 		marble[marbCount].checked = false
 		marble[marbCount].match = false		
+		marble[marbCount]:addEventListener("touch", MatchMarbles)		
+		physics.addBody( marble[marbCount], { density=2, friction=0, bounce=.5 } )
+		marble[marbCount].gravityScale = .5		
 
+		-- color is assigned. the random number uses a variable that is changed based on the current level
+		-- the first few levels only feature 3 colors to familiarize the player with the game
 		local marbColor = math.random(0, marbleColors - 1)
 	
 		if (marbColor == 0) then
@@ -287,11 +305,6 @@ local function DropMarble() -- initially fill the screen with bubbles based on t
 			marble[marbCount].color = "orange"
 			marble[marbCount].fill = { type="image", filename="oBub.png" }
 		end		
-		
-		marble[marbCount]:addEventListener("touch", MatchMarbles)--, marble[marbCount])
-			
-		physics.addBody( marble[marbCount], { density=2, friction=0, bounce=.5 } ) -- with .5 they seem to bouce and settle in better
-		marble[marbCount].gravityScale = .5 -- they settle properly at .25 gravity
 
 		-- drop sound
 		-- since there are only 32 audio channels and this sound may play rapidly,
@@ -307,34 +320,8 @@ local function DropMarble() -- initially fill the screen with bubbles based on t
 	end
 end
 
-local function TickClock()
-	
-	--tick clock
-	
-	-- check for win
-	
-	
+local function TickClock()	
 	timeLeft = timeLeft - 10
-	
-	
-	
-	-- if (gameScore >= scoreToBeat) then
-		-- print("You win!")
-
-	-- elseif (timeLeft == 0) then
-		-- print("You lose")
-	-- else
-		print("Time left: "..timeLeft.." Score: "..gameScore.." Level: "..level)
-	-- end
-	
-
-	
-	-- change level
-
-	
-	
-	
-
 end
 
 local drop = nil
