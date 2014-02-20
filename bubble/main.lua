@@ -10,10 +10,11 @@ local bg = display.newImage("bg.png")
 local bar = display.newImage("bar.png")
 
 
-bg.x = 200; bg.y = 150;
+bg.x = 160; bg.y = 240;
 rightSide.x = 318; rightSide.y = 20;
-leftSide.x = 2; leftSide.y = 5;
+leftSide.x = 2; leftSide.y = 20;
 bottom.x = 100; bottom.y = 500;
+bottom:toFront()
 bar.x = 100; bar.y = -20;
 
 physics.addBody( bottom, "static", {friction = 0, bounce = 0})
@@ -46,7 +47,7 @@ local dropSound = audio.loadSound("drop.mp3")
 local winSound = audio.loadSound("win.mp3")
 local twinkleSound = audio.loadSound("twinkle.mp3")
 local backGroundMusic
-local sdtrk = audio.loadSound("Pamgaea.mp3")
+local sdtrk = audio.loadStream("Pamgaea.mp3")
 
 
 local function bgMusic()
@@ -407,7 +408,7 @@ local function StartGame()
 	
 	levelVal.text = level
 	score.text = gameScore
-	scoreToBeatVal.text = scoreToBeat
+	scoreToBeatVal.text = math.round(scoreToBeat)
 	timeLeftVal.text = timeLeft/10
 	
 	if (level == 1 and gameScore == 0 and gameOn == false) then -- start game		
