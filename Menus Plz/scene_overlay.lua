@@ -22,12 +22,20 @@ storyboard.removeAll()
 function scene:createScene( event )
   local group = self.view
   
-  local overlayBg = display.newRect(display.contentCenterX -100, display.contentCenterY - 120, 200, 200)
-  overlayBg:setFillColor(1100,50,200)
+  local overlayBg = display.newRect(display.contentCenterX /2, display.contentCenterY /2, 200, 200)
+  overlayBg:setFillColor(100,50,200)
   
-  local gameTitle = display.newText( "Overlay! Click to close", 0, 0, globals.font.bold, 20 )
-  gameTitle.x = display.contentCenterX
-  gameTitle.y = display.contentCenterY - 20
+  local overlayText = display.newText( "Overlay! Click to close", 0, 0, globals.font.bold, 20 )
+  overlayText.x = display.contentCenterX
+  overlayText.y = display.contentCenterY - 20
+  
+  --screen wide rectangle to prevent clicks onto game beneath
+  local tapSponge = display.newRect(0,0, display.contentWidth, display.contentHeight)
+  tapSponge.alpha = 0;
+  tapSponge.isHitTestable = true
+  tapSponge:addEventListener("touch", function() return true end)
+  tapSponge:addEventListener("tap", function() return true end)
+  
   
   --make listener for overlay menu
 	local function onTap( event )
@@ -35,10 +43,11 @@ function scene:createScene( event )
 	end
 	
 	--add the listener
-	gameTitle:addEventListener("tap", onTap)
+	overlayText:addEventListener("tap", onTap)
   
+  group:insert(tapSponge)
   group:insert(overlayBg)
-  group:insert(gameTitle)
+  group:insert(overlayText)
  
 end
  
