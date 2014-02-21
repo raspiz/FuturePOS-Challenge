@@ -3,7 +3,7 @@ application = {
 		width = 320,
 		height = 480, 
 		fps = 30,		
-		scale = "letterBox",
+		scale = "zoomStretch",
         xAlign = "center",
         yAlign = "top"
 

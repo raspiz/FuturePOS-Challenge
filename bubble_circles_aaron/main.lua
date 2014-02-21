@@ -33,7 +33,7 @@ rightSide.x = 318; rightSide.y = 20;
 leftSide.x = 2; leftSide.y = 20;
 bottom.x = 100; bottom.y = screenHeight--500;
 bottom:toFront()
-bar.x = 100; bar.y = 36---20;
+bar.x = 100; bar.y = 5---20;
 
 physics.addBody( bottom, "static", {friction = 0, bounce = 0})
 physics.addBody( leftSide, "static", {friction = 0, bounce = 0})
@@ -57,7 +57,7 @@ local scoreToBeat = 500--1000
 --local timeToBeat = 3000
 local timeToBeat = 3000
 local timeLeft = timeToBeat
-local dropSpeed = 100--1000	
+local dropSpeed = 1000	
 local marbleColors = 3
 
 local blopSound = audio.loadSound("blop.mp3")
@@ -291,10 +291,10 @@ prevent them from bunching up when dropping in rapidly
 name(index value), checked, match, touch listener, physics properties. color is randomly assigned.
 --]]
 local function DropMarble()
-	if (marbCount < 80) then -- max number of marbles on the screen
+	if (marbCount < 88) then -- max number of marbles on the screen
 
 		marbCount = marbCount + 1 -- starts at 0 when game is launched. the first marble will be index 1
-		marble[marbCount] = display.newCircle( setX, -70, 19 ) --xloc, yloc, radius(size)		
+		marble[marbCount] = display.newCircle( setX, -20, 19 ) --xloc, yloc, radius(size)		
 		
 		-- spawn location of marbles shifts left and right to let them fall clear of one another
 		if (xUp) then
@@ -358,19 +358,19 @@ end
 local drop = nil
 local gameTimer = nil
 
-local score = display.newText("",290, -9, native.systemFontBold, 18 )
-local scoreLbl = display.newText("Score:",232, -9, native.systemFontBold, 18 )
-local scoreToBeatVal = display.newText("",150, -9, native.systemFontBold, 18 )
+local score = display.newText("",290, 20, native.systemFontBold, 18 )
+local scoreLbl = display.newText("Score:",232, 20, native.systemFontBold, 18 )
+local scoreToBeatVal = display.newText("",150, 20, native.systemFontBold, 18 )
 scoreToBeatVal:setFillColor( 0, 255, 0 )
-local scoreToBeatLbl = display.newText("Score To Beat:",62, -9, native.systemFontBold, 18 )
+local scoreToBeatLbl = display.newText("Score To Beat:",62, 20, native.systemFontBold, 18 )
 scoreToBeatLbl:setFillColor( 0, 255, 0 )
-local levelVal = display.newText("",75,-30, native.systemFontBold, 18)
+local levelVal = display.newText("",75, 7, native.systemFontBold, 18)
 levelVal:setFillColor( 1, 0, 2 )
-local levelLbl = display.newText("Level:",27, -30, native.systemFontBold, 18 )
+local levelLbl = display.newText("Level:",27, 7, native.systemFontBold, 18 )
 levelLbl:setFillColor( 1, 0, 2 )
-local timeLeftVal = display.newText("",290, -30, native.systemFontBold, 18 )
+local timeLeftVal = display.newText("",290, 7, native.systemFontBold, 18 )
 timeLeftVal:setFillColor( 70, 20, 0 )
-local timeLeftLbl = display.newText("Time Left:",220, -30, native.systemFontBold, 18 )
+local timeLeftLbl = display.newText("Time Left:",220, 7, native.systemFontBold, 18 )
 timeLeftLbl:setFillColor( 70, 20, 0 )
 
 --[[
@@ -405,7 +405,7 @@ local function StartGame()
 		bgMusic()
 	elseif (gameScore >= scoreToBeat) then
 	
-		audio.play(levelupSound)
+		
 
 		timer.cancel(gameTimer)
 		timer.cancel(drop)
@@ -420,8 +420,8 @@ local function StartGame()
 		marble = {}
 		marbCount = 0
 		
-
-
+		local LevelUpImage = display.newImage("levelComplete.png", screenWidth/2, screenHeight/2)
+		
 		dropSpeed = dropSpeed - 50
 		if (dropSpeed <= 0) then
 			dropSpeed = 1
@@ -444,14 +444,18 @@ local function StartGame()
 			marbleColors = 4
 		end 		
 
-		gameTimer = timer.performWithDelay (1000, TickClock, timeToBeat) 
-		drop = timer.performWithDelay (dropSpeed, DropMarble, -1)--, 100)	-- delay, function to call, iterations -- was 500, DropMarble, 100
-
-
+		local function ShowLevelUp(event)
+			LevelUpImage:removeSelf()
+			LevelUpImage = nil
+			
+			gameTimer = timer.performWithDelay (1000, TickClock, timeToBeat) 
+			drop = timer.performWithDelay (dropSpeed, DropMarble, -1)
+		end
+			
+		audio.play(levelupSound)	
+		timer.performWithDelay(3000, ShowLevelUp)
 	end
 		
 end
 
 local runGame = timer.performWithDelay (25, StartGame, -1)
-
-print(display.contentHeight)
