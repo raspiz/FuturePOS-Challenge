@@ -57,7 +57,7 @@ local scoreToBeat = 500--1000
 --local timeToBeat = 3000
 local timeToBeat = 3000
 local timeLeft = timeToBeat
-local dropSpeed = 1000	
+local dropSpeed = 1	
 local marbleColors = 3
 
 local blopSound = audio.loadSound("blop.mp3")
@@ -409,8 +409,8 @@ local function StartGame()
 
 		timer.cancel(gameTimer)
 		timer.cancel(drop)
-		gameTimer = nil
-		drop = nil	
+		--gameTimer = nil
+		--drop = nil	
 		
 		for i = 1, marbCount do	
 			display.remove(marble[i])				
