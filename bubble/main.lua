@@ -1,6 +1,5 @@
 local physics = require ( "physics" )
 physics.start()
-
 physics.setScale( 30 ) -- scale of the objects may need to change or remove this
 
 local bottom = display.newImage("stones.png")
@@ -8,6 +7,7 @@ local leftSide = display.newImage("wall1.png")
 local rightSide = display.newImage("wall2.png")
 local bg = display.newImage("bg.png")
 local bar = display.newImage("bar.png")
+local pauseBtn = display.newImage("pauseBtn.png")
 
 
 bg.x = 160; bg.y = 240;
@@ -16,6 +16,7 @@ leftSide.x = 2; leftSide.y = 20;
 bottom.x = 100; bottom.y = 500;
 bottom:toFront()
 bar.x = 100; bar.y = -20;
+pauseBtn.x = 145; pauseBtn.y = -20;
 
 physics.addBody( bottom, "static", {friction = 0, bounce = 0})
 physics.addBody( leftSide, "static", {friction = 0, bounce = 0})
@@ -380,18 +381,23 @@ local gameTimer = nil
 
 local score = display.newText("",290, -9, native.systemFontBold, 18 )
 local scoreLbl = display.newText("Score:",232, -9, native.systemFontBold, 18 )
-local scoreToBeatVal = display.newText("",150, -9, native.systemFontBold, 18 )
+local scoreToBeatVal = display.newText("",290, -30, native.systemFontBold, 18 )
 scoreToBeatVal:setFillColor( 0, 255, 0 )
-local scoreToBeatLbl = display.newText("Score To Beat:",62, -9, native.systemFontBold, 18 )
+local scoreToBeatLbl = display.newText("Next Level:",215, -30, native.systemFontBold, 18 )
+
 scoreToBeatLbl:setFillColor( 0, 255, 0 )
 local levelVal = display.newText("",75,-30, native.systemFontBold, 18)
 levelVal:setFillColor( 1, 0, 2 )
 local levelLbl = display.newText("Level:",27, -30, native.systemFontBold, 18 )
 levelLbl:setFillColor( 1, 0, 2 )
-local timeLeftVal = display.newText("",290, -30, native.systemFontBold, 18 )
+local timeLeftVal = display.newText("",100,-9, native.systemFontBold, 18 )
 timeLeftVal:setFillColor( 70, 20, 0 )
-local timeLeftLbl = display.newText("Time Left:",220, -30, native.systemFontBold, 18 )
+local timeLeftLbl = display.newText("Time Left:",40,-9, native.systemFontBold, 18 )
 timeLeftLbl:setFillColor( 70, 20, 0 )
+
+
+
+
 
 local function StartGame()
 
@@ -405,6 +411,7 @@ local function StartGame()
 	levelVal:toFront()
 	timeLeftVal:toFront()
 	timeLeftLbl:toFront()
+	pauseBtn:toFront()
 	
 	levelVal.text = level
 	score.text = gameScore
