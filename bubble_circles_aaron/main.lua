@@ -3,13 +3,24 @@ MmmPop: Created by Aaron Whitmer, Eric McDonald, and Corbin Troup. 2014
 This game challenges players to pop off sets of colored marbles from the screen. The marbles will
 drop in randomly and increase in speed as the player progresses. Larger sets of marbles yield higher scores.
 
-The main logic of the game is located in the MatchMarbles and TouchCheck functions. 
+The main logic of the game is located in the MatchMarbles and TouchCheck functions. MatchMarbles is activated
+by a touch event and runs through routines to check to see if enough marbles are touching to make a deletion, 
+handles changes to the marble table, and figures up scoring. TouchCheck is called from MatchMarbles and is 
+responsible for determining if 2 marbles are within proximity of one another to be considered a match.
+
+The DropMarble function handles the creation of marbles and assigning physics properties, listener, and other attributes.
+
+The StartGame function is called by a timer object when the program is loaded and handles calls to DropMarbles and the
+game timer object as well as parameters for leveling up.
 --]]
 
 
 -- include and start Corona physics engine. needed for marble behavior.
 local physics = require ( "physics" )
 physics.start()
+
+local screenWidth = display.contentWidth
+local screenHeight = display.contentHeight
 
 local bottom = display.newImage("stones.png")
 local leftSide = display.newImage("wall1.png")
@@ -20,9 +31,9 @@ local bar = display.newImage("bar.png")
 bg.x = 160; bg.y = 240;
 rightSide.x = 318; rightSide.y = 20;
 leftSide.x = 2; leftSide.y = 20;
-bottom.x = 100; bottom.y = 500;
+bottom.x = 100; bottom.y = screenHeight--500;
 bottom:toFront()
-bar.x = 100; bar.y = -20;
+bar.x = 100; bar.y = 36---20;
 
 physics.addBody( bottom, "static", {friction = 0, bounce = 0})
 physics.addBody( leftSide, "static", {friction = 0, bounce = 0})
@@ -46,12 +57,12 @@ local scoreToBeat = 500--1000
 --local timeToBeat = 3000
 local timeToBeat = 3000
 local timeLeft = timeToBeat
-local dropSpeed = 1000	
+local dropSpeed = 100--1000	
 local marbleColors = 3
 
 local blopSound = audio.loadSound("blop.mp3")
 local dropSound = audio.loadSound("drop.mp3")
-local winSound = audio.loadSound("win.mp3")
+local levelupSound = audio.loadSound("levelup.mp3")
 local twinkleSound = audio.loadSound("twinkle.mp3")
 
 local backGroundMusic
@@ -200,36 +211,56 @@ local function MatchMarbles(event)
 				marble = tempTable
 				
 				-- scoring data is computed and output to the screen
-				local newScore = 0
-				local textOutput = ""
+				local newScore = 0				
 				
+				-- multipliers applied to matches > 3
 				if (deleted == 3) then
-					newScore = deleted * 10				
-				elseif (deleted < 6) then	
-					newScore = deleted * 1.5 * 10
-					textOutput = "X1.5 Multiplier!"
-				elseif (deleted < 8) then
-					newScore = deleted * 2 * 10
-					textOutput = "X2 Multiplier!"
-					audio.play(twinkleSound)
-				elseif (deleted < 10) then
-					newScore = deleted * 2.5 * 10
-					textOutput = "X2.5 Multiplier!"
-					audio.play(twinkleSound)
+					newScore = deleted * 10
 				else
-					newScore = deleted * 3 * 10
-					textOutput = "X3 Multiplier!"
-					audio.play(twinkleSound)
+					local multImage = nil						
+					
+					multX = event.target.x
+					multY = event.target.y
+					
+					-- if the event x and y values are too close to the edge we will pull them in
+					if (multX < 40) then
+						multX = 40
+					elseif (multX > screenWidth - 50) then
+						multX = screenWidth - 50
+					end
+					
+					if (multY < 40) then
+						multY = 40
+					elseif (multY > screenHeight - 50) then
+						multY = screenHeight - 50
+					end
+				
+					-- multiplier score computed and image displayed
+					if (deleted < 6) then	
+						newScore = deleted * 1.5 * 10
+						multImage = display.newImage("x15.png", multX, multY)
+					elseif (deleted < 8) then
+						newScore = deleted * 2 * 10
+						multImage = display.newImage("x2.png", multX, multY)
+						audio.play(twinkleSound)
+					elseif (deleted < 10) then
+						newScore = deleted * 2.5 * 10
+						multImage = display.newImage("x25.png", multX, multY)
+						audio.play(twinkleSound)
+					else
+						newScore = deleted * 3 * 10
+						multImage = display.newImage("x3.png", multX, multY)
+						audio.play(twinkleSound)
+					end					
+					
+					-- this function will be called by a timer event to remove the image indicator after a set amount of time
+					local function RemoveMult(event)
+						multImage:removeSelf()
+						multImage = nil
+					end
+					
+					timer.performWithDelay(1500, RemoveMult)					
 				end
-				
-				local scoreText = display.newText(textOutput, event.target.x, event.target.y, "Arial", 20 )
-				
-				-- this function will be called by a timer event to remove the text indicator after a set amount of time
-				local function RemoveText(event)
-					scoreText:removeSelf()
-				end
-				
-				timer.performWithDelay(2000, RemoveText)
 				
 				gameScore = gameScore + newScore -- total score updated
 				
@@ -237,7 +268,7 @@ local function MatchMarbles(event)
 			end	
 			
 			-- if ANY matches were found, the table is run through and all marbles are explicitely 
-			-- set to not checked and not a match
+			-- set to not checked and not a match so they are ready for the next touch event
 			for i = 1, marbCount do		
 				marble[i].checked = false
 				marble[i].match = false
@@ -260,7 +291,7 @@ prevent them from bunching up when dropping in rapidly
 name(index value), checked, match, touch listener, physics properties. color is randomly assigned.
 --]]
 local function DropMarble()
-	if (marbCount < 96) then -- max number of marbles on the screen
+	if (marbCount < 80) then -- max number of marbles on the screen
 
 		marbCount = marbCount + 1 -- starts at 0 when game is launched. the first marble will be index 1
 		marble[marbCount] = display.newCircle( setX, -70, 19 ) --xloc, yloc, radius(size)		
@@ -281,10 +312,10 @@ local function DropMarble()
 		end		
 		
 		-- marble properties are assigned
-		marble[marbCount].name = marbCount
+		marble[marbCount].name = marbCount -- the name is set to the index value for future comparisons
 		marble[marbCount].checked = false
 		marble[marbCount].match = false		
-		marble[marbCount]:addEventListener("touch", MatchMarbles)		
+		marble[marbCount]:addEventListener("touch", MatchMarbles)	-- touch event	
 		physics.addBody( marble[marbCount], { density=2, friction=0, bounce=.5 } )
 		marble[marbCount].gravityScale = .5		
 
@@ -302,8 +333,8 @@ local function DropMarble()
 			marble[marbCount].color = "red"
 			marble[marbCount].fill = { type="image", filename="rBub.png" }
 		else
-			marble[marbCount].color = "orange"
-			marble[marbCount].fill = { type="image", filename="oBub.png" }
+			marble[marbCount].color = "purple"
+			marble[marbCount].fill = { type="image", filename="pBub.png" }
 		end		
 
 		-- drop sound
@@ -342,6 +373,11 @@ timeLeftVal:setFillColor( 70, 20, 0 )
 local timeLeftLbl = display.newText("Time Left:",220, -30, native.systemFontBold, 18 )
 timeLeftLbl:setFillColor( 70, 20, 0 )
 
+--[[
+StartGame: This function will be called by a timer object when the game loads. It will then be called indefinitely in
+order to check for 
+Initial game conditions are set
+--]]
 local function StartGame()
 
 	bar:toFront()
@@ -369,7 +405,7 @@ local function StartGame()
 		bgMusic()
 	elseif (gameScore >= scoreToBeat) then
 	
-		audio.play(winSound)
+		audio.play(levelupSound)
 
 		timer.cancel(gameTimer)
 		timer.cancel(drop)
@@ -394,7 +430,7 @@ local function StartGame()
 		level = level + 1
 
 		--scoreToBeat = scoreToBeat * 2
-		scoreToBeat = scoreToBeat * 1.4
+		scoreToBeat = math.ceil(scoreToBeat * 1.4)
 
 		--timeToBeat = timeToBeat - 150
 		-- if (timeToBeat <= 0) then
@@ -417,3 +453,5 @@ local function StartGame()
 end
 
 local runGame = timer.performWithDelay (25, StartGame, -1)
+
+print(display.contentHeight)
