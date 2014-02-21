@@ -25,10 +25,6 @@ local levelBeat = false
 local gameOn = false
 --music playing
 local mute = false
---clock running
-local ticking = true
---make more marbles
-local producing = true;
 
 local gameScore = 0
 
@@ -137,8 +133,9 @@ function scene:overlayBegan( event )
   
   --PAUSE MUSIC AND TIMER IN HERE SOMEHOW (using mute bool it would seem)
   mute = true;
-  ticking = false;
-  producing = false;
+  audio.pause(1);
+  timer.pause(gameTimer);
+  timer.pause(drop);
   physics.pause();
  
 end
@@ -150,9 +147,10 @@ function scene:overlayEnded( event )
   
   --RESUME MUSIC AND TIMER IN HERE SOMEHOW
   mute = false;
-  ticking = true;
-  producing = true;
-  physics.start()
+  audio.resume(1);
+  timer.resume(gameTimer);
+  timer.resume(drop);
+  physics.start();
  
 end
 
@@ -456,9 +454,7 @@ function TickClock()
 	--tick clock
 	
 	-- check for win
-	if(ticking == true) then
 		timeLeft = timeLeft - 10	
-	end
 	
 	-- if (gameScore >= scoreToBeat) then
 		-- print("You win!")

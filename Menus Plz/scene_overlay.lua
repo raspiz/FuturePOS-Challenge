@@ -22,15 +22,15 @@ storyboard.removeAll()
 function scene:createScene( event )
   local group = self.view
   
-  local overlayBg = display.newRect(display.contentCenterX /2, display.contentCenterY /2, 200, 200)
-  overlayBg:setFillColor(100,50,200)
+  local overlayBg = display.newRect(display.contentCenterX /2, display.contentCenterY /2, 3, 3)
+  overlayBg:setFillColor(1,.5,.2)
   
   local overlayText = display.newText( "Overlay! Click to close", 0, 0, globals.font.bold, 20 )
   overlayText.x = display.contentCenterX
   overlayText.y = display.contentCenterY - 20
   
   --screen wide rectangle to prevent clicks onto game beneath
-  local tapSponge = display.newRect(0,0, display.contentWidth, display.contentHeight)
+  local tapSponge = display.newRect(display.contentWidth/2,display.contentHeight/2, display.contentWidth, display.contentHeight)
   tapSponge.alpha = 0;
   tapSponge.isHitTestable = true
   tapSponge:addEventListener("touch", function() return true end)
