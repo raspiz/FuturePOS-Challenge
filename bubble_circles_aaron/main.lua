@@ -471,7 +471,7 @@ local function StartGame()
 		end
 			
 		audio.play(levelupSound)	
-		timer.performWithDelay(3000, ShowLevelUp)
+		timer.performWithDelay(1000, ShowLevelUp)
 	end
 		
 end
