@@ -38,6 +38,7 @@ local screenWidth = display.contentWidth
 local screenHeight = display.contentHeight
 local levelBeat = false
 local gameOn = false
+local gameRunning = true
 local mute = false
 local gameScore = 0
 local bgLoad = 0
@@ -49,7 +50,7 @@ local scoreToBeat = 500
 local timeToBeat = 3000
 local timeLeft = timeToBeat
 --drop rate lower = faster
-local dropSpeed = 10
+local dropSpeed = 30
 local marbleColors = 3
 local drop = nil 
 local gameTimer = nil
@@ -77,6 +78,7 @@ screenWidth = display.contentWidth
 screenHeight = display.contentHeight
 levelBeat = false
 gameOn = false
+gameRunning = true
 mute = false
 gameScore = 0
 bgLoad = 0
@@ -88,7 +90,7 @@ scoreToBeat = 500
 timeToBeat = 3000
 timeLeft = timeToBeat
 --drop rate lower = faster
-dropSpeed = 10
+dropSpeed = 1000
 marbleColors = 3
 drop = nil 
 gameTimer = nil
@@ -108,7 +110,7 @@ end
 function scene:createScene( event )
 	 group = self.view
 	 
-	 resetValues()
+	 --resetValues()
 
 	--create screen objects
 	bottom = display.newImage("stones.png")
@@ -177,8 +179,9 @@ end
 -- Called immediately after scene has moved onscreen:
 function scene:enterScene( event )
   
-  --RUN THE GAME FROM HERE 
- local runGame = timer.performWithDelay (25, StartGame, -1)
+  --RUN THE GAME FROM HERE 	 
+  --resetValues()
+  runGame = timer.performWithDelay (25, StartGame, -1)
   
  
 end
@@ -193,6 +196,8 @@ function scene:overlayBegan( event )
   audio.pause();
   timer.pause(gameTimer);
   timer.pause(drop);
+  timer.pause(runGame);
+  gameRunning = false;
   physics.pause();
  
 end
@@ -203,11 +208,15 @@ function scene:overlayEnded( event )
   local overlay_name = event.scene_overlay  -- name of the overlay scene
   
   --RESUME MUSIC AND TIMER IN HERE SOMEHOW
+  if(gameRunning)then
   mute = false;
   audio.resume();
   timer.resume(gameTimer);
   timer.resume(drop);
+  timer.resume(runGame);
+  gameRunning = true;
   physics.start();
+  end
  
 end
 
@@ -285,145 +294,145 @@ keeps nil values out of the table and keeps the table size consistent.
 will alert the player upon a successful deletion.
 --]]
 function MatchMarbles(event)
-	if (event.phase == "began") then	
-		local touchCount = 1 -- marbles that are matches. starts at one to include the touched marble
-		local deleted = 1 -- marbles to be removed if deletion occurs. this also helps determine score
-		local num = event.target.name -- the table index of the marble that was touched
-		
-		-- the TouchCheck function will return any additional matches found. If more
-		-- were found, addional checks will be performed on the matched marbles
-		touchCount = TouchCheck(num, touchCount)
+		if (event.phase == "began") then	
+			local touchCount = 1 -- marbles that are matches. starts at one to include the touched marble
+			local deleted = 1 -- marbles to be removed if deletion occurs. this also helps determine score
+			local num = event.target.name -- the table index of the marble that was touched
+			
+			-- the TouchCheck function will return any additional matches found. If more
+			-- were found, addional checks will be performed on the matched marbles
+			touchCount = TouchCheck(num, touchCount)
 
-		-- the rest of the function will only execute if additional matches were found
-		if (touchCount > 1) then		
-			event.target.match = true
-			event.target.checked = true	
-		
-			-- loopDone flag will not be to true when the table is able to be gone through
-			-- without any new matches found
-			local loopDone = false 
-			while (loopDone == false) do
-				loopDone = true
-				
-				-- nested loop to find more matches. marbles marked as being a match but not having been
-				-- checked yet will call TouchCheck. New matches will set loopDone to false so that the 
-				-- inner loop can start from the beginning again. Once all matched marbles have been checked,
-				-- the outer loop will end
-				for i = 1, marbCount do
-					if (marble[i].match == true and marble[i].checked == false) then
-						touchCount = TouchCheck(i, touchCount)
-						marble[i].checked = true
-						loopDone = false			
-					end		
-				end		
-			end
+			-- the rest of the function will only execute if additional matches were found
+			if (touchCount > 1) then		
+				event.target.match = true
+				event.target.checked = true	
 			
-			-- deletion will occur if a group of 3 or more marbles was found at the touch event
-			-- the marble will be removed from the screen, and then set as nil in the table
-			if (touchCount >= 3) then
-				audio.play(blopSound)
-				for i = 1, marbCount do	
-					if (marble[i].match) then
-						if (i == num) then	-- special case to remove the marble that was touched				
-							event.target:removeSelf()
-							marble[num] = nil
-						else -- all other matched marbles deleted here
-							display.remove(marble[i])	
-							--marble[i]:removeSelf()								
-							marble[i] = nil
-							deleted = deleted + 1
+				-- loopDone flag will not be to true when the table is able to be gone through
+				-- without any new matches found
+				local loopDone = false 
+				while (loopDone == false) do
+					loopDone = true
+					
+					-- nested loop to find more matches. marbles marked as being a match but not having been
+					-- checked yet will call TouchCheck. New matches will set loopDone to false so that the 
+					-- inner loop can start from the beginning again. Once all matched marbles have been checked,
+					-- the outer loop will end
+					for i = 1, marbCount do
+						if (marble[i].match == true and marble[i].checked == false) then
+							touchCount = TouchCheck(i, touchCount)
+							marble[i].checked = true
+							loopDone = false			
+						end		
+					end		
+				end
+				
+				-- deletion will occur if a group of 3 or more marbles was found at the touch event
+				-- the marble will be removed from the screen, and then set as nil in the table
+				if (touchCount >= 3) then
+					audio.play(blopSound)
+					for i = 1, marbCount do	
+						if (marble[i].match) then
+							if (i == num) then	-- special case to remove the marble that was touched				
+								event.target:removeSelf()
+								marble[num] = nil
+							else -- all other matched marbles deleted here
+								display.remove(marble[i])	
+								--marble[i]:removeSelf()								
+								marble[i] = nil
+								deleted = deleted + 1
+							end
+						end		
+					end
+							
+					-- temporary table and count are created and the remaining marbles are placed inside		
+					local tempTable = {}		
+					local newCount = 0			
+					
+					for i = 1, marbCount do
+						if(marble[i] ~= nil) then -- only marbles that have not been deleted are added
+							newCount = newCount + 1					
+							tempTable[newCount] = marble[i]
 						end
-					end		
-				end
-						
-				-- temporary table and count are created and the remaining marbles are placed inside		
-				local tempTable = {}		
-				local newCount = 0			
-				
-				for i = 1, marbCount do
-					if(marble[i] ~= nil) then -- only marbles that have not been deleted are added
-						newCount = newCount + 1					
-						tempTable[newCount] = marble[i]
-					end
-				end
-				
-				-- explicitely make the original marble table nil
-				for i = 1, marbCount do			
-					marble[i] = nil			
-				end
-				
-				-- assign the temp table to the original table
-				marble = tempTable
-				
-				-- scoring data is computed and output to the screen
-				local newScore = 0				
-				
-				-- multipliers applied to matches > 3
-				if (deleted == 3) then
-					newScore = deleted * 10
-				else
-					local multImage = nil						
-					
-					multX = event.target.x
-					multY = event.target.y
-					
-					-- if the event x and y values are too close to the edge we will pull them in
-					if (multX < 40) then
-						multX = 40
-					elseif (multX > screenWidth - 50) then
-						multX = screenWidth - 50
 					end
 					
-					if (multY < 40) then
-						multY = 40
-					elseif (multY > screenHeight - 50) then
-						multY = screenHeight - 50
+					-- explicitely make the original marble table nil
+					for i = 1, marbCount do			
+						marble[i] = nil			
 					end
-				
-					-- multiplier score computed and image displayed
-					if (deleted < 6) then	
-						newScore = deleted * 1.5 * 10
-						multImage = display.newImage("x15.png", multX, multY)
-					elseif (deleted < 8) then
-						newScore = deleted * 2 * 10
-						multImage = display.newImage("x2.png", multX, multY)
-						audio.play(twinkleSound)
-					elseif (deleted < 10) then
-						newScore = deleted * 2.5 * 10
-						multImage = display.newImage("x25.png", multX, multY)
-						audio.play(twinkleSound)
+					
+					-- assign the temp table to the original table
+					marble = tempTable
+					
+					-- scoring data is computed and output to the screen
+					local newScore = 0				
+					
+					-- multipliers applied to matches > 3
+					if (deleted == 3) then
+						newScore = deleted * 10
 					else
-						newScore = deleted * 3 * 10
-						multImage = display.newImage("x3.png", multX, multY)
-						audio.play(twinkleSound)
-					end	
+						local multImage = nil						
 						
-					--add multiplier text to scren
-					group:insert(multImage);
+						multX = event.target.x
+						multY = event.target.y
+						
+						-- if the event x and y values are too close to the edge we will pull them in
+						if (multX < 40) then
+							multX = 40
+						elseif (multX > screenWidth - 50) then
+							multX = screenWidth - 50
+						end
+						
+						if (multY < 40) then
+							multY = 40
+						elseif (multY > screenHeight - 50) then
+							multY = screenHeight - 50
+						end
 					
-					-- this function will be called by a timer event to remove the image indicator after a set amount of time
-					local function RemoveMult(event)
-						multImage:removeSelf()
-						multImage = nil
+						-- multiplier score computed and image displayed
+						if (deleted < 6) then	
+							newScore = deleted * 1.5 * 10
+							multImage = display.newImage("x15.png", multX, multY)
+						elseif (deleted < 8) then
+							newScore = deleted * 2 * 10
+							multImage = display.newImage("x2.png", multX, multY)
+							audio.play(twinkleSound)
+						elseif (deleted < 10) then
+							newScore = deleted * 2.5 * 10
+							multImage = display.newImage("x25.png", multX, multY)
+							audio.play(twinkleSound)
+						else
+							newScore = deleted * 3 * 10
+							multImage = display.newImage("x3.png", multX, multY)
+							audio.play(twinkleSound)
+						end	
+							
+						--add multiplier text to scren
+						group:insert(multImage);
+						
+						-- this function will be called by a timer event to remove the image indicator after a set amount of time
+						local function RemoveMult(event)
+							multImage:removeSelf()
+							multImage = nil
+						end
+						
+						timer.performWithDelay(600, RemoveMult)					
 					end
 					
-					timer.performWithDelay(600, RemoveMult)					
-				end
+					gameScore = gameScore + newScore -- total score updated
+					
+					marbCount = marbCount - deleted -- table size variable adjusted
+				end	
 				
-				gameScore = gameScore + newScore -- total score updated
-				
-				marbCount = marbCount - deleted -- table size variable adjusted
-			end	
-			
-			-- if ANY matches were found, the table is run through and all marbles are explicitely 
-			-- set to not checked and not a match so they are ready for the next touch event
-			for i = 1, marbCount do		
-				marble[i].checked = false
-				marble[i].match = false
-				marble[i].name = i
-			end			
+				-- if ANY matches were found, the table is run through and all marbles are explicitely 
+				-- set to not checked and not a match so they are ready for the next touch event
+				for i = 1, marbCount do		
+					marble[i].checked = false
+					marble[i].match = false
+					marble[i].name = i
+				end			
+			end
 		end
-	end
 end
 
 --[[
@@ -440,67 +449,68 @@ name(index value), checked, match, touch listener, physics properties. color is 
 --]]
 function DropMarble() -- initially fill the screen with bubbles based on the timer tr	
 -- stop at 104
+		if (marbCount < 88) then -- max number of marbles on the screen
 
-	if (marbCount < 88) then -- max number of marbles on the screen
-
-		marbCount = marbCount + 1 -- starts at 0 when game is launched. the first marble will be index 1
-		marble[marbCount] = display.newCircle( setX, -20, 19 ) --xloc, yloc, radius(size)		
-		
-		-- spawn location of marbles shifts left and right to let them fall clear of one another
-		if (xUp) then
-			if (setX >= 240) then
-				xUp = false
-			end	
+			marbCount = marbCount + 1 -- starts at 0 when game is launched. the first marble will be index 1
+			marble[marbCount] = display.newCircle( setX, -20, 19 ) --xloc, yloc, radius(size)		
 			
-			setX = setX + 40
-		else
-			if (setX <= 80) then
-				xUp = true
+			-- spawn location of marbles shifts left and right to let them fall clear of one another
+			if (xUp) then
+				if (setX >= 240) then
+					xUp = false
+				end	
+				
+				setX = setX + 40
+			else
+				if (setX <= 80) then
+					xUp = true
+				end
+				
+				setX = setX - 40		
+			end		
+			
+			-- marble properties are assigned
+			marble[marbCount].name = marbCount -- the name is set to the index value for future comparisons
+			marble[marbCount].checked = false
+			marble[marbCount].match = false		
+			marble[marbCount]:addEventListener("touch", MatchMarbles)	-- touch event	
+			physics.addBody( marble[marbCount], { density=2, friction=0, bounce=.5 } )
+			marble[marbCount].gravityScale = .5		
+
+			-- color is assigned. the random number uses a variable that is changed based on the current level
+			-- the first few levels only feature 3 colors to familiarize the player with the game
+			local marbColor = math.random(0, marbleColors - 1)
+		
+			if (marbColor == 0) then
+				marble[marbCount].color = "blue"
+				marble[marbCount].fill = { type="image", filename="bBub.png" }
+			elseif (marbColor == 1) then
+				marble[marbCount].color = "green"
+				marble[marbCount].fill = { type="image", filename="gBub.png" }
+			elseif (marbColor == 2) then
+				marble[marbCount].color = "red"
+				marble[marbCount].fill = { type="image", filename="rBub.png" }
+			else
+				marble[marbCount].color = "purple"
+				marble[marbCount].fill = { type="image", filename="pBub.png" }
+			end		
+			
+			if(gameRunning) then
+				group:insert(marble[marbCount]);
 			end
-			
-			setX = setX - 40		
-		end		
-		
-		-- marble properties are assigned
-		marble[marbCount].name = marbCount -- the name is set to the index value for future comparisons
-		marble[marbCount].checked = false
-		marble[marbCount].match = false		
-		marble[marbCount]:addEventListener("touch", MatchMarbles)	-- touch event	
-		physics.addBody( marble[marbCount], { density=2, friction=0, bounce=.5 } )
-		marble[marbCount].gravityScale = .5		
 
-		-- color is assigned. the random number uses a variable that is changed based on the current level
-		-- the first few levels only feature 3 colors to familiarize the player with the game
-		local marbColor = math.random(0, marbleColors - 1)
-	
-		if (marbColor == 0) then
-			marble[marbCount].color = "blue"
-			marble[marbCount].fill = { type="image", filename="bBub.png" }
-		elseif (marbColor == 1) then
-			marble[marbCount].color = "green"
-			marble[marbCount].fill = { type="image", filename="gBub.png" }
-		elseif (marbColor == 2) then
-			marble[marbCount].color = "red"
-			marble[marbCount].fill = { type="image", filename="rBub.png" }
-		else
-			marble[marbCount].color = "purple"
-			marble[marbCount].fill = { type="image", filename="pBub.png" }
-		end		
-		
-		group:insert(marble[marbCount]);
-
-		-- drop sound
-		-- since there are only 32 audio channels and this sound may play rapidly,
-		-- a variable to find a free channel is created, starting on channel 10.
-		-- if no channel above the passed in number is found, it defaults to 0
-		-- this allows other sounds to occupy the lower channels
-		-- an if statement checks the value of availableChannel. if it is not 0,
-		-- then there is a free channel for the audio, otherwise it doesn't play
-		local availableChannel = audio.findFreeChannel(10)
-		if (availableChannel ~= 0) then
-			audio.play( dropSound, { channel=availableChannel } )
+			-- drop sound
+			-- since there are only 32 audio channels and this sound may play rapidly,
+			-- a variable to find a free channel is created, starting on channel 10.
+			-- if no channel above the passed in number is found, it defaults to 0
+			-- this allows other sounds to occupy the lower channels
+			-- an if statement checks the value of availableChannel. if it is not 0,
+			-- then there is a free channel for the audio, otherwise it doesn't play
+			local availableChannel = audio.findFreeChannel(10)
+			if (availableChannel ~= 0) then
+				audio.play( dropSound, { channel=availableChannel } )
+			end
 		end
-	end
 end
 
 --tick the clock
@@ -514,97 +524,95 @@ order to check for
 Initial game conditions are set
 --]]
 function StartGame()
-
-	bar:toFront()
-	score:toFront()
-	scoreLbl:toFront()
-	scoreToBeatLbl:toFront()
-	scoreToBeatVal:toFront()
-	levelLbl:toFront()
-	levelVal:toFront()
-	timeLeftVal:toFront()
-	timeLeftLbl:toFront()
-	pauseBtn:toFront()
-	bottom:toFront()
-	
-	levelVal.text = level
-	score.text = gameScore
-	scoreToBeatVal.text = math.round(scoreToBeat)
-	timeLeftVal.text = timeLeft/10
-
-	if (level == 1 and gameScore == 0 and gameOn == false) then -- start game		
-		gameTimer = timer.performWithDelay (1000, TickClock, timeToBeat) 
-		drop = timer.performWithDelay (dropSpeed, DropMarble, -1)--, 100)	-- delay, function to call, iterations -- was 500, DropMarble, 100
-		
-		gameOn = true		
-		bgMusic()
-		
-	elseif (gameScore >= scoreToBeat) then
-		timer.pause(gameTimer)
-		timer.pause(drop)
-		--gameTimer = nil
-	--drop = nil	
-		
-		for i = 1, marbCount do	
-			display.remove(marble[i])				
-			marble[i] = nil				
-		end
-
-		marble = {}
-		marbCount = 0
-		
-		bgLoad = bgLoad + 1		
-		bgLoad = bgLoad % 7
-		bg:removeSelf()
-		bg = nil
-		bg = display.newImage("bg_"..bgLoad..".png")
-		bg.width = screenWidth
-		bg.height = screenHeight
-		bg.x = screenWidth / 2
-		bg.y = screenHeight / 2
-		bg:toBack()
+		bar:toFront()
+		score:toFront()
+		scoreLbl:toFront()
+		scoreToBeatLbl:toFront()
+		scoreToBeatVal:toFront()
+		levelLbl:toFront()
+		levelVal:toFront()
+		timeLeftVal:toFront()
+		timeLeftLbl:toFront()
+		pauseBtn:toFront()
 		bottom:toFront()
 		
-		local LevelUpImage = display.newImage("levelComplete.png", screenWidth/2, screenHeight/2)
-		
-		group:insert(LevelUpImage)
-		
-		dropSpeed = dropSpeed - 50
-		if (dropSpeed <= 0) then
-			dropSpeed = 1
-		end
+		levelVal.text = level
+		score.text = gameScore
+		scoreToBeatVal.text = math.round(scoreToBeat)
+		timeLeftVal.text = timeLeft/10
 
-		level = level + 1
+		if (level == 1 and gameScore == 0 and gameOn == false) then -- start game		
+			gameTimer = timer.performWithDelay (1000, TickClock, timeToBeat) 
+			drop = timer.performWithDelay (dropSpeed, DropMarble, -1)--, 100)	-- delay, function to call, iterations -- was 500, DropMarble, 100
+			
+			gameOn = true		
+			bgMusic()
+			
+		elseif (gameScore >= scoreToBeat) then
+			timer.pause(gameTimer)
+			timer.pause(drop)
+			--gameTimer = nil
+		--drop = nil	
+			
+			for i = 1, marbCount do	
+				display.remove(marble[i])				
+				marble[i] = nil				
+			end
 
-		scoreToBeat = math.ceil(scoreToBeat * 1.4)
-		
-		timeLeft = timeToBeat
-		
+			marble = {}
+			marbCount = 0
+			
+			bgLoad = bgLoad + 1		
+			bgLoad = bgLoad % 7
+			bg:removeSelf()
+			bg = nil
+			bg = display.newImage("bg_"..bgLoad..".png")
+			bg.width = screenWidth
+			bg.height = screenHeight
+			bg.x = screenWidth / 2
+			bg.y = screenHeight / 2
+			bg:toBack()
+			bottom:toFront()
+			
+			local LevelUpImage = display.newImage("levelComplete.png", screenWidth/2, screenHeight/2)
+			
+			group:insert(LevelUpImage)
+			
+			dropSpeed = dropSpeed - 50
+			if (dropSpeed <= 0) then
+				dropSpeed = 1
+			end
 
-		if (level > 4) then
-			marbleColors = 4
-		end 		
+			level = level + 1
 
-		local function ShowLevelUp(event)
-			LevelUpImage:removeSelf()
-			LevelUpImage = nil
+			scoreToBeat = math.ceil(scoreToBeat * 1.4)
+			
+			timeLeft = timeToBeat
 			
 
-		end
-			
-		audio.play(levelupSound)	
-		timer.performWithDelay(1000, ShowLevelUp)
-		gameTimer = timer.performWithDelay (1000, TickClock, timeToBeat) 
-		drop = timer.performWithDelay (dropSpeed, DropMarble, -1)
-		
-	elseif (timeLeft <= 0) then
-	--	storyboard.gotoScene("")
-	--GO TO END GAME SCENE
-	--DO THAT HERE	
-	--YOU REALLY NEED TO DO THAT HERE
-		
-	end
+			if (level > 4) then
+				marbleColors = 4
+			end 		
 
+			local function ShowLevelUp(event)
+				LevelUpImage:removeSelf()
+				LevelUpImage = nil
+				
+
+			end
+				
+			audio.play(levelupSound)	
+			timer.performWithDelay(1000, ShowLevelUp)
+			gameTimer = timer.performWithDelay (1000, TickClock, timeToBeat) 
+			drop = timer.performWithDelay (dropSpeed, DropMarble, -1)
+			
+		elseif (timeLeft <= 0) then
+		--	storyboard.gotoScene("")
+		--GO TO END GAME SCENE
+		--DO THAT HERE	
+		--YOU REALLY NEED TO DO THAT HERE
+			
+		end
 end
  
 ---------------------------------------------------------------------------------
