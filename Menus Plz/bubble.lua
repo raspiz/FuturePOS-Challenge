@@ -283,8 +283,8 @@ function MatchMarbles(event)
 							event.target:removeSelf()
 							marble[num] = nil
 						else -- all other matched marbles deleted here
-							--display.remove(marble[i])	
-							marble[i]:removeSelf()								
+							display.remove(marble[i])	
+							--marble[i]:removeSelf()								
 							marble[i] = nil
 							deleted = deleted + 1
 						end
