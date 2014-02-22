@@ -1,8 +1,24 @@
 levelup.wav
-author's name: sepal
-freesound.org
+Author: sepal
+Website: freesound.org
 
-
-Pangaea Kevin MacLeod (incompetech.com)
+Pangaea
+Author: Kevin MacLeod
 Licensed under Creative Commons: By Attribution 3.0
-http://creativecommons.org/licenses/by/3.0/
+Website: http://incompetech.com
+
+Mario Jumping Sound
+Author: Mike Koenig
+Licensed under Creative Commons: By Attribution 3.0
+Website: http://soundbible.com
+
+Blop Sound
+Author: Mark DiAngelo
+Licensed under Creative Commons: By Attribution 3.0
+Website: http://soundbible.com
+
+Shooting Star Sound
+Author: Mike Koenig
+Licensed under Creative Commons: By Attribution 3.0
+Website: http://soundbible.com
+
