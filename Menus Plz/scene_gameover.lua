@@ -1,13 +1,19 @@
---
---Splash screen for mmmPOP game.
-
-local globals = require ("globals")
+---------------------------------------------------------------------------------
+-- SCENE NAME
+-- Scene notes go here
+---------------------------------------------------------------------------------
+ 
+local globals = require( "globals" )
  
 local storyboard = require( "storyboard" )
 local scene = storyboard.newScene()
  
 -- Clear previous scene
 storyboard.removeAll()
+ 
+-- local forward references should go here --
+ 
+ 
 ---------------------------------------------------------------------------------
 -- BEGINNING OF YOUR IMPLEMENTATION
 ---------------------------------------------------------------------------------
@@ -17,36 +23,48 @@ storyboard.removeAll()
 function scene:createScene( event )
   local group = self.view
  
-  local gameTitle = display.newImage("logo.png")
-  gameTitle.x = display.contentCenterX
-  gameTitle.y = 75
-  
-  gameTitle.width = display.contentWidth
+  local score = globals.score
  
-  local startButton = display.newText( "Start", 0, 0, globals.font.regular, 28 )
-  startButton.x = display.contentCenterX
-  startButton.y = display.contentCenterY + 50
-  
-  local creditButton = display.newText( "Credits", 0, 0, globals.font.regular, 28 )
-  creditButton.x = display.contentCenterX
-  creditButton.y = display.contentCenterY +150
-  
-  local background = display.newRect(display.contentWidth/2,display.contentHeight/2, display.contentWidth, display.contentHeight)
-  
-  background:setFillColor(45/255, 49/255, 52/255)
-  
-   group:insert(background)
-  group:insert(startButton)
-  group:insert(creditButton)
-  group:insert(gameTitle )
-
+  local result = "New high score:\n" .. score .." Points!"
+ 
+  local resultsText = display.newText( result, 0, 0, globals.font.regular, 32 )
+  resultsText.x = display.contentCenterX
+  resultsText.y = display.contentCenterY - 60
+ 
+  group:insert( resultsText )
+ 
+  local mainMenuButton = display.newText( "Main Menu", 0, 0, globals.font.regular, 18 )
+  mainMenuButton.x = display.contentCenterX
+  mainMenuButton.y = display.contentCenterY + 60
  
   local function onTap( event )
-    storyboard.gotoScene( "bubble" )
+    storyboard.gotoScene( "scene_menu" )
   end
-  startButton:addEventListener( "tap", onTap )
+  mainMenuButton:addEventListener( "tap", onTap )
+ 
+  group:insert( mainMenuButton )
+ 
+  -- Check next level
+  local levelNum = globals.levelNum
+ 
+  levelNum = levelNum + 1
+ 
+  if ( levelNum <= 3 ) then
+    local nextLevelButton = display.newText( "Play Level " .. levelNum, 0, 0, globals.font.regular, 18 )
+    nextLevelButton.x = display.contentCenterX
+    nextLevelButton.y = display.contentCenterY + 100
+ 
+    local function onTap( event )
+      globals.levelNum = levelNum
+      storyboard.gotoScene( "scene_game" )
+    end
+    nextLevelButton:addEventListener( "tap", onTap )
+ 
+    group:insert( nextLevelButton )
+  end
  
 end
+ 
  
 ---------------------------------------------------------------------------------
 -- END OF YOUR IMPLEMENTATION

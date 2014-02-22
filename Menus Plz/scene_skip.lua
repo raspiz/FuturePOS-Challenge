@@ -1,13 +1,16 @@
---
---Splash screen for mmmPOP game.
-
-local globals = require ("globals")
+-- scene_menu.lua
+ 
+local globals = require( "globals" )
  
 local storyboard = require( "storyboard" )
 local scene = storyboard.newScene()
  
 -- Clear previous scene
 storyboard.removeAll()
+ 
+-- local forward references should go here --
+ 
+ 
 ---------------------------------------------------------------------------------
 -- BEGINNING OF YOUR IMPLEMENTATION
 ---------------------------------------------------------------------------------
@@ -17,35 +20,10 @@ storyboard.removeAll()
 function scene:createScene( event )
   local group = self.view
  
-  local gameTitle = display.newImage("logo.png")
-  gameTitle.x = display.contentCenterX
-  gameTitle.y = 75
-  
-  gameTitle.width = display.contentWidth
- 
-  local startButton = display.newText( "Start", 0, 0, globals.font.regular, 28 )
-  startButton.x = display.contentCenterX
-  startButton.y = display.contentCenterY + 50
-  
-  local creditButton = display.newText( "Credits", 0, 0, globals.font.regular, 28 )
-  creditButton.x = display.contentCenterX
-  creditButton.y = display.contentCenterY +150
-  
-  local background = display.newRect(display.contentWidth/2,display.contentHeight/2, display.contentWidth, display.contentHeight)
-  
-  background:setFillColor(45/255, 49/255, 52/255)
-  
-   group:insert(background)
-  group:insert(startButton)
-  group:insert(creditButton)
-  group:insert(gameTitle )
+end
 
- 
-  local function onTap( event )
-    storyboard.gotoScene( "bubble" )
-  end
-  startButton:addEventListener( "tap", onTap )
- 
+function scene:enterScene(event)
+	storyboard.createScene("bubble")
 end
  
 ---------------------------------------------------------------------------------

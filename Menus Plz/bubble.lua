@@ -16,6 +16,7 @@ game timer object as well as parameters for leveling up.
 
 --requires
 local storyboard = require( "storyboard" )
+storyboard.purgeOnSceneChange = true;
 local physics = require ( "physics" )
 
 --start the included Corona physics engine, needed for marble behavior.
@@ -41,6 +42,7 @@ local mute = false
 local gameScore = 0
 local bgLoad = 0
 
+
 -- game parameters
 local level = 1
 local scoreToBeat = 500
@@ -58,14 +60,55 @@ local levelupSound = audio.loadStream("levelup.mp3")
 local twinkleSound = audio.loadSound("twinkle.mp3")
 local backGroundMusic
 local sdtrk = audio.loadStream("Pamgaea.mp3")
+
+gameVolume = audio.setVolume(.5)
+gameVolume = audio.getVolume()
+
  
 ---------------------------------------------------------------------------------
 -- BEGINNING OF YOUR IMPLEMENTATION
 ---------------------------------------------------------------------------------
- 
+function resetValues()
+marble = {}
+marbCount = 0
+setX = 40
+xUp = true
+screenWidth = display.contentWidth
+screenHeight = display.contentHeight
+levelBeat = false
+gameOn = false
+mute = false
+gameScore = 0
+bgLoad = 0
+
+
+-- game parameters
+level = 1
+scoreToBeat = 500
+timeToBeat = 3000
+timeLeft = timeToBeat
+--drop rate lower = faster
+dropSpeed = 10
+marbleColors = 3
+drop = nil 
+gameTimer = nil
+
+blopSound = audio.loadSound("blop.mp3")
+dropSound = audio.loadSound("drop.mp3")
+levelupSound = audio.loadStream("levelup.mp3")
+twinkleSound = audio.loadSound("twinkle.mp3")
+backGroundMusic = nil;
+sdtrk = audio.loadStream("Pamgaea.mp3")
+
+gameVolume = audio.setVolume(.5)
+gameVolume = audio.getVolume()
+
+end
 -- Called when the scene's view does not exist:
 function scene:createScene( event )
-	local group = self.view
+	 group = self.view
+	 
+	 resetValues()
 
 	--create screen objects
 	bottom = display.newImage("stones.png")
@@ -102,9 +145,12 @@ function scene:createScene( event )
 	local function onTap( event )
     storyboard.showOverlay("scene_overlay")
 	end
+	
 
 	--add the listener
 	pauseBtn:addEventListener("tap", onTap)
+	bar:addEventListener("touch", function() return true end)
+  bar:addEventListener("tap", function() return true end)
 
 	--add to physics
 	physics.addBody( bottom, "static", {friction = 0, bounce = 0})
@@ -130,7 +176,6 @@ end
  
 -- Called immediately after scene has moved onscreen:
 function scene:enterScene( event )
-   screenGroup = self.view
   
   --RUN THE GAME FROM HERE 
  local runGame = timer.performWithDelay (25, StartGame, -1)
@@ -145,7 +190,7 @@ function scene:overlayBegan( event )
   
   --PAUSE MUSIC AND TIMER IN HERE SOMEHOW (using mute bool it would seem)
   mute = true;
-  audio.pause(1);
+  audio.pause();
   timer.pause(gameTimer);
   timer.pause(drop);
   physics.pause();
@@ -159,7 +204,7 @@ function scene:overlayEnded( event )
   
   --RESUME MUSIC AND TIMER IN HERE SOMEHOW
   mute = false;
-  audio.resume(1);
+  audio.resume();
   timer.resume(gameTimer);
   timer.resume(drop);
   physics.start();
@@ -354,7 +399,7 @@ function MatchMarbles(event)
 					end	
 						
 					--add multiplier text to scren
-					screenGroup:insert(multImage);
+					group:insert(multImage);
 					
 					-- this function will be called by a timer event to remove the image indicator after a set amount of time
 					local function RemoveMult(event)
@@ -362,7 +407,7 @@ function MatchMarbles(event)
 						multImage = nil
 					end
 					
-					timer.performWithDelay(1500, RemoveMult)					
+					timer.performWithDelay(600, RemoveMult)					
 				end
 				
 				gameScore = gameScore + newScore -- total score updated
@@ -442,7 +487,7 @@ function DropMarble() -- initially fill the screen with bubbles based on the tim
 			marble[marbCount].fill = { type="image", filename="pBub.png" }
 		end		
 		
-		screenGroup:insert(marble[marbCount]);
+		group:insert(marble[marbCount]);
 
 		-- drop sound
 		-- since there are only 32 audio channels and this sound may play rapidly,
@@ -495,8 +540,8 @@ function StartGame()
 		bgMusic()
 		
 	elseif (gameScore >= scoreToBeat) then
-		timer.cancel(gameTimer)
-		timer.cancel(drop)
+		timer.pause(gameTimer)
+		timer.pause(drop)
 		--gameTimer = nil
 	--drop = nil	
 		
@@ -522,7 +567,7 @@ function StartGame()
 		
 		local LevelUpImage = display.newImage("levelComplete.png", screenWidth/2, screenHeight/2)
 		
-		screenGroup:insert(LevelUpImage)
+		group:insert(LevelUpImage)
 		
 		dropSpeed = dropSpeed - 50
 		if (dropSpeed <= 0) then
@@ -544,12 +589,13 @@ function StartGame()
 			LevelUpImage:removeSelf()
 			LevelUpImage = nil
 			
-			gameTimer = timer.performWithDelay (1000, TickClock, timeToBeat) 
-			drop = timer.performWithDelay (dropSpeed, DropMarble, -1)
+
 		end
 			
 		audio.play(levelupSound)	
-		timer.performWithDelay(3000, ShowLevelUp)
+		timer.performWithDelay(1000, ShowLevelUp)
+		gameTimer = timer.performWithDelay (1000, TickClock, timeToBeat) 
+		drop = timer.performWithDelay (dropSpeed, DropMarble, -1)
 		
 	elseif (timeLeft <= 0) then
 	--	storyboard.gotoScene("")
