@@ -410,9 +410,7 @@ local function StartGame()
 		
 		gameOn = true		
 		bgMusic()
-	elseif (gameScore >= scoreToBeat) then
-	
-		
+	elseif (gameScore >= scoreToBeat) then		
 
 		timer.cancel(gameTimer)
 		timer.cancel(drop)

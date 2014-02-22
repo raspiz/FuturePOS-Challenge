@@ -39,6 +39,7 @@ local levelBeat = false
 local gameOn = false
 local mute = false
 local gameScore = 0
+local bgLoad = 0
 
 -- game parameters
 local level = 1
@@ -48,15 +49,15 @@ local timeLeft = timeToBeat
 --drop rate lower = faster
 local dropSpeed = 10
 local marbleColors = 3
-drop = nil 
-gameTimer = nil
+local drop = nil 
+local gameTimer = nil
 
 local blopSound = audio.loadSound("blop.mp3")
 local dropSound = audio.loadSound("drop.mp3")
-local winSound = audio.loadSound("levelup.mp3")
+local levelupSound = audio.loadStream("levelup.mp3")
 local twinkleSound = audio.loadSound("twinkle.mp3")
 local backGroundMusic
-local sdtrk = audio.loadSound("Pamgaea.mp3")
+local sdtrk = audio.loadStream("Pamgaea.mp3")
  
 ---------------------------------------------------------------------------------
 -- BEGINNING OF YOUR IMPLEMENTATION
@@ -67,27 +68,29 @@ function scene:createScene( event )
 	local group = self.view
 
 	--create screen objects
-	 bottom = display.newImage("stones.png")
-	 leftSide = display.newImage("wall1.png")
-	 rightSide = display.newImage("wall2.png")
-	 bg = display.newImage("bg.png", true)
-	 bar = display.newImage("bar.png")
-	 score = display.newText("",290, -9, native.systemFontBold, 18 )
-	 scoreLbl = display.newText("Score:",232, 20, native.systemFontBold, 18 )
-	 scoreToBeatVal = display.newText("",150, 20, native.systemFontBold, 18 )
-	 scoreToBeatLbl = display.newText("Score To Beat:",62, 20, native.systemFontBold, 18 )
-	 levelVal = display.newText("",75,7, native.systemFontBold, 18)
-	 levelLbl = display.newText("Level:",27, 7, native.systemFontBold, 18 )
-	 timeLeftVal = display.newText("",290, 7, native.systemFontBold, 18 )
-	 timeLeftLbl = display.newText("Time Left:",220, 7, native.systemFontBold, 18 )
-
+	bottom = display.newImage("stones.png")
+	leftSide = display.newImage("wall1.png")
+	rightSide = display.newImage("wall2.png")	 
+	bg = display.newImage("bg_0.png", true)
+	bar = display.newImage("bar.png")
+	pauseBtn = display.newImage("pauseBtn.png")
+	score = display.newText("",290, 21, native.systemFontBold, 18 )
+	scoreLbl = display.newText("Score:",232, 21, native.systemFontBold, 18 )
+	scoreToBeatVal = display.newText("",290, 7, native.systemFontBold, 18 )
+	scoreToBeatLbl = display.newText("Next Level:",215, 7, native.systemFontBold, 18 )
+	levelVal = display.newText("",75,7, native.systemFontBold, 18)
+	levelLbl = display.newText("Level:",27, 7, native.systemFontBold, 18 )
+	timeLeftVal = display.newText("",100,21, native.systemFontBold, 18 )
+	timeLeftLbl = display.newText("Time Left:",40,21, native.systemFontBold, 18 )
 
 	--specify properties
-	bg.x = display.contentWidth / 2; bg.y = display.contentHeight /2;
+	bg.width = screenWidth; bg.height = screenHeight
+	bg.x = screenWidth / 2; bg.y = screenHeight / 2
 	rightSide.x = 318; rightSide.y = 20;
 	leftSide.x = 2; leftSide.y = 20;
 	bottom.x = display.contentWidth / 2; bottom.y = screenHeight;
-	bar.x = 100; bar.y = 5;
+	bar.x = 100; bar.y = 8;
+	pauseBtn.x = 145; pauseBtn.y = 13;
 	scoreToBeatVal:setFillColor( 0, 255, 0 )
 	scoreToBeatLbl:setFillColor( 0, 255, 0 )
 	levelVal:setFillColor( 1, 0, 2 )
@@ -101,8 +104,7 @@ function scene:createScene( event )
 	end
 
 	--add the listener
-	bottom:addEventListener("tap", onTap)
-
+	pauseBtn:addEventListener("tap", onTap)
 
 	--add to physics
 	physics.addBody( bottom, "static", {friction = 0, bounce = 0})
@@ -115,6 +117,7 @@ function scene:createScene( event )
 	group:insert(rightSide)
 	group:insert(bg)
 	group:insert(bar)
+	group:insert(pauseBtn)
 	group:insert(score)
 	group:insert(scoreLbl)
 	group:insert(scoreToBeatVal)
@@ -123,8 +126,6 @@ function scene:createScene( event )
 	group:insert(levelLbl)
 	group:insert(timeLeftVal)
 	group:insert(timeLeftLbl)
-	
-
 end
  
 -- Called immediately after scene has moved onscreen:
@@ -283,8 +284,7 @@ function MatchMarbles(event)
 							marble[num] = nil
 						else -- all other matched marbles deleted here
 							--display.remove(marble[i])	
-								marble[i]:removeSelf()
-								
+							marble[i]:removeSelf()								
 							marble[i] = nil
 							deleted = deleted + 1
 						end
@@ -479,6 +479,7 @@ function StartGame()
 	levelVal:toFront()
 	timeLeftVal:toFront()
 	timeLeftLbl:toFront()
+	pauseBtn:toFront()
 	bottom:toFront()
 	
 	levelVal.text = level
@@ -507,9 +508,21 @@ function StartGame()
 		marble = {}
 		marbCount = 0
 		
+		bgLoad = bgLoad + 1		
+		bgLoad = bgLoad % 7
+		bg:removeSelf()
+		bg = nil
+		bg = display.newImage("bg_"..bgLoad..".png")
+		bg.width = screenWidth
+		bg.height = screenHeight
+		bg.x = screenWidth / 2
+		bg.y = screenHeight / 2
+		bg:toBack()
+		bottom:toFront()
+		
 		local LevelUpImage = display.newImage("levelComplete.png", screenWidth/2, screenHeight/2)
 		
-		screenGroup:insert(LevelUpImage);
+		screenGroup:insert(LevelUpImage)
 		
 		dropSpeed = dropSpeed - 50
 		if (dropSpeed <= 0) then
