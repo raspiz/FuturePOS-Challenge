@@ -25,10 +25,17 @@ local screenHeight = display.contentHeight
 local bottom = display.newImage("stones.png")
 local leftSide = display.newImage("wall1.png")
 local rightSide = display.newImage("wall2.png")
-local bg = display.newImage("bg.png")
+--local bg = display.newImage("bg.png")
 local bar = display.newImage("bar.png")
 
-bg.x = 160; bg.y = 240;
+local bg = display.newImage("bg_0.png")
+local bgLoad = 0
+
+bg.width = screenWidth
+bg.height = screenHeight
+bg.x = screenWidth / 2
+bg.y = screenHeight / 2
+
 rightSide.x = 318; rightSide.y = 20;
 leftSide.x = 2; leftSide.y = 20;
 bottom.x = 100; bottom.y = screenHeight--500;
@@ -420,9 +427,21 @@ local function StartGame()
 		marble = {}
 		marbCount = 0
 		
+		bgLoad = bgLoad + 1		
+		bgLoad = bgLoad % 7
+		bg:removeSelf()
+		bg = nil
+		bg = display.newImage("bg_"..bgLoad..".png")
+		bg.width = screenWidth
+		bg.height = screenHeight
+		bg.x = screenWidth / 2
+		bg.y = screenHeight / 2
+		bottom:toFront()
+		
 		local LevelUpImage = display.newImage("levelComplete.png", screenWidth/2, screenHeight/2)
 		
 		dropSpeed = dropSpeed - 50
+		
 		if (dropSpeed <= 0) then
 			dropSpeed = 1
 		end
@@ -439,7 +458,8 @@ local function StartGame()
 		
 		timeLeft = timeToBeat
 		
-
+	
+		
 		if (level > 4) then
 			marbleColors = 4
 		end 		

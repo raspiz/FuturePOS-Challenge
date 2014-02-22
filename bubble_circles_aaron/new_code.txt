@@ -1,0 +1,24 @@
+new code
+
+-- background globals and starting parameters
+-- staring bg
+local bg = display.newImage("bg_0.png")
+local bgLoad = 0
+
+-- bg properties
+bg.width = screenWidth
+bg.height = screenHeight
+bg.x = screenWidth / 2
+bg.y = screenHeight / 2
+
+-- place right before levelupimage in start game
+		bgLoad = bgLoad + 1		
+		bgLoad = bgLoad % 7
+		bg:removeSelf()
+		bg = nil
+		bg = display.newImage("bg_"..bgLoad..".png")
+		bg.width = screenWidth
+		bg.height = screenHeight
+		bg.x = screenWidth / 2
+		bg.y = screenHeight / 2
+		bottom:toFront()
