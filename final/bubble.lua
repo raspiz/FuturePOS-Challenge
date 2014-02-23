@@ -72,47 +72,6 @@ gameVolume = audio.getVolume()
 -- this function will return game variables and parameters to their default values
 -- this is needed for the storyboard to restart the scene if the player starts a new game
 -- after the initial session
-function resetValues()
-	marble = {}
-	marbCount = 0
-	setX = 40
-	xUp = true
-	screenWidth = display.contentWidth
-	screenHeight = display.contentHeight
-	levelBeat = false
-	gameOn = false
-	gameRunning = true
-	mute = false
-	gameScore = 0
-	bgLoad = 0
-	gameOverTone = false
-	warningTone = false
-	restart = false
-
-
-	-- game parameters
-	level = 1
-	scoreToBeat = 500
-	timeToBeat = 3000
-	timeLeft = timeToBeat
-	--drop rate lower = faster
-	dropSpeed = 1000
-	marbleColors = 3
-	drop = nil 
-	gameTimer = nil
-
-	blopSound = audio.loadSound("blop.mp3")
-	dropSound = audio.loadSound("drop.mp3")
-	levelupSound = audio.loadStream("levelup.mp3")
-	twinkleSound = audio.loadSound("twinkle.mp3")
-	backGroundMusic = nil;
-	sdtrk = audio.loadStream("Pamgaea.mp3")
-	warningSound = audio.loadStream("warning.mp3")
-	gameoverSound = audio.loadSound("gameover.mp3")
-
-	gameVolume = audio.setVolume(.5)
-	gameVolume = audio.getVolume()
-end
 
 -- Called when the scene's view does not exist:
 function scene:createScene( event )
@@ -121,7 +80,7 @@ function scene:createScene( event )
 	--create screen objects
 	bottom = display.newImage("stones.png")
 	leftSide = display.newImage("wall1.png")
-	rightSide = display.newImage("wall2.png")	 
+	rightSide = display.newImage("wall2.png")
 	bg = display.newImage("bg_0.png", true)
 	bar = display.newImage("bar.png")
 	pauseBtn = display.newImage("pauseBtn.png")
@@ -183,13 +142,9 @@ function scene:createScene( event )
 end
  
 -- Called immediately after scene has moved onscreen:
-function scene:enterScene( event )
-  
+function scene:enterScene( event )  
   --RUN THE GAME FROM HERE 	 
-  --resetValues()
-  runGame = timer.performWithDelay (25, StartGame, -1)
-  
- 
+  runGame = timer.performWithDelay (25, StartGame, -1) 
 end
 
 -- Called if/when overlay scene is displayed via storyboard.showOverlay()
