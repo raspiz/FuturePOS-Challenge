@@ -2,6 +2,16 @@ levelup.wav
 Author: sepal
 Website: freesound.org
 
+game over.wav
+Author: fins
+Licensed as Creative Commons 0 License
+Website: freesound.org
+
+Beeping.wav
+Author: 0maukka
+Licensed as Creative Commons 0 License
+Website: freesound.org
+
 Pangaea
 Author: Kevin MacLeod
 Licensed under Creative Commons: By Attribution 3.0
@@ -21,4 +31,3 @@ Shooting Star Sound
 Author: Mike Koenig
 Licensed under Creative Commons: By Attribution 3.0
 Website: http://soundbible.com
-

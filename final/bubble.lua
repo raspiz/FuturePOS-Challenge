@@ -605,8 +605,6 @@ function StartGame()
 			local function ShowLevelUp(event)
 				LevelUpImage:removeSelf()
 				LevelUpImage = nil
-				
-
 			end
 				
 			audio.play(levelupSound)	
