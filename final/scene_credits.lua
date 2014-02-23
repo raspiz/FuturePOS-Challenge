@@ -56,9 +56,9 @@ function scene:createScene( event )
   corbinJob.y = display.contentCenterY + 70
   corbinJob:setFillColor(1, 1, 1)
  
-  local soundCredits = display.newText("Sound Credits:\nlevelup.wav -- Author: sepal\ngame over.wav -- Author: fins\nBeeping.wav -- Author: 0maukka\nWebsite: freesound.org\n\nPangaea -- Author: Kevin MacLeod\nWebsite: http://incompetech.com\n\nMario Jumping Sound  -- Author: Mike Koenig\nShooting Star Sound  -- Author: Mike Koenig\nBlop Sound -- Author: Mark DiAngelo\nWebsite: http://soundbible.com\n\nAll sounds used under\nCreative Commons Attribution 3.0 or 0 usage", 0, 0, globals.font.regular, 12)
+  local soundCredits = display.newText("levelup.wav -- Author: sepal\ngame over.wav -- Author: fins\nBeeping.wav -- Author: 0maukka\nWebsite: freesound.org\n\nPangaea -- Author: Kevin MacLeod\nWebsite: http://incompetech.com\n\nMario Jumping Sound  -- Author: Mike Koenig\nShooting Star Sound  -- Author: Mike Koenig\nBlop Sound -- Author: Mark DiAngelo\nWebsite: http://soundbible.com\n\nAll sounds used under\nCreative Commons Attribution 3.0 or 0 usage", 0, 0, globals.font.regular, 10)
   soundCredits.x = display.contentCenterX
-  soundCredits.y = display.contentCenterY + 20
+  soundCredits.y = display.contentCenterY + 25
   soundCredits:setFillColor(1, 1, 1) 
  
   local menuBar = display.newRect(display.contentCenterX, display.contentCenterY + 210, 110, 30)
