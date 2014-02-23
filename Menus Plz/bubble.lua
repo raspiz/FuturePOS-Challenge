@@ -50,7 +50,7 @@ local scoreToBeat = 500
 local timeToBeat = 3000
 local timeLeft = timeToBeat
 --drop rate lower = faster
-local dropSpeed = 30
+local dropSpeed = 1000
 local marbleColors = 3
 local drop = nil 
 local gameTimer = nil
@@ -545,7 +545,7 @@ function StartGame()
 			gameTimer = timer.performWithDelay (1000, TickClock, timeToBeat) 
 			drop = timer.performWithDelay (dropSpeed, DropMarble, -1)--, 100)	-- delay, function to call, iterations -- was 500, DropMarble, 100
 			
-			gameOn = true		
+			gameOn = true	
 			bgMusic()
 			
 		elseif (gameScore >= scoreToBeat) then
