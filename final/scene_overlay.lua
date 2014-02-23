@@ -143,7 +143,6 @@ end
 
 local function Restart(event)
 	restart = true
-	bg:removeSelf()
 	storyboard.gotoScene("scene_splash")
 end
   

@@ -177,7 +177,11 @@ function scene:overlayEnded( event )
   timer.resume(runGame);
   gameRunning = true;
   physics.start();
+  else
+  	bg:removeSelf()
+	bg = nil
   end
+  
  
 end
 
